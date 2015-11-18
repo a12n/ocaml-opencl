@@ -3,7 +3,8 @@
 true: safe_string
 true: warn(+A-32-34-44)
 
-<cl.{mli,ml}>: package(ctypes.stubs)
+<*.{mli,ml}>: package(ctypes.stubs)
+
 <cl.{cma,cmxa}>: use_cl_stubs
 
 <libcl_stubs.*>: use_opencl
