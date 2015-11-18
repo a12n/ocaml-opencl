@@ -407,13 +407,23 @@ module Device = struct
       (CArray.start devices) (from_voidp T.cl_uint null) |> check_error;
     CArray.to_list devices
 
-  (* TODO *)
-  let driver_version _device = ""
-  let extensions _device = ""
-  let name _device = ""
-  let profile _device = ""
-  let vendor _device = ""
-  let version _device = ""
+  let driver_version device =
+    Info.string (C.clGetDeviceInfo device T._CL_DRIVER_VERSION)
+
+  let extensions device =
+    Info.string (C.clGetDeviceInfo device T._CL_DEVICE_EXTENSIONS)
+
+  let name device =
+    Info.string (C.clGetDeviceInfo device T._CL_DEVICE_NAME)
+
+  let profile device =
+    Info.string (C.clGetDeviceInfo device T._CL_DEVICE_PROFILE)
+
+  let vendor device =
+    Info.string (C.clGetDeviceInfo device T._CL_DEVICE_VENDOR)
+
+  let version device =
+    Info.string (C.clGetDeviceInfo device T._CL_DEVICE_VERSION)
 
   (* TODO *)
   let address_bits _device = 0
