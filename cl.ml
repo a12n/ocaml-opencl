@@ -176,8 +176,24 @@ module Device = struct
     fma : bool;
   }
 
-  (* TODO *)
-  let get _platform _device_types = []
+  let cl_device_type_of_device_type_list list =
+    List.fold_left Unsigned.UInt64.add Unsigned.UInt64.zero
+      (List.map (function `Default -> T._CL_DEVICE_TYPE_DEFAULT
+                        | `Cpu -> T._CL_DEVICE_TYPE_CPU
+                        | `Gpu -> T._CL_DEVICE_TYPE_GPU
+                        | `Accelerator -> T._CL_DEVICE_TYPE_ACCELERATOR
+                        | `All -> T._CL_DEVICE_TYPE_ALL) list)
+
+  let get platform device_types =
+    let device_type = cl_device_type_of_device_type_list device_types in
+    let num_devices = allocate T.cl_uint Unsigned.UInt32.zero in
+    C.clGetDeviceIDs platform device_type Unsigned.UInt32.zero
+      (from_voidp T.cl_device_id null) num_devices |> check_error;
+    let devices = CArray.make T.cl_device_id
+        (Unsigned.UInt32.to_int (!@ num_devices)) in
+    C.clGetDeviceIDs platform device_type (!@ num_devices)
+      (CArray.start devices) (from_voidp T.cl_uint null) |> check_error;
+    CArray.to_list devices
 
   (* TODO *)
   let driver_version _device = ""
