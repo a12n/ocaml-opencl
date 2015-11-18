@@ -959,8 +959,10 @@ module Kernel = struct
     C.clSetKernelArg kernel (Unsigned.UInt32.of_int index)
       (Unsigned.Size_t.of_int arg_size) arg_value |> check_error
 
+  let function_name kernel =
+    Info.string (C.clGetKernelInfo kernel T._CL_KERNEL_FUNCTION_NAME)
+
   (* TODO *)
-  let function_name _kernel = ""
   let num_args _kernel = 0
   let context _kernel = from_voidp T._cl_context null
   let program _kernel = from_voidp T._cl_program null
