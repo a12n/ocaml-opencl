@@ -869,13 +869,22 @@ module Program = struct
   (* TODO *)
   let context _program = from_voidp T._cl_context null
   let devices _program = []
-  let source _program = ""
+
+  let source program =
+    Info.string (C.clGetProgramInfo program T._CL_PROGRAM_SOURCE)
+
+  (* TODO *)
   let binaries _program = []
 
   (* TODO *)
   let build_status _program _device = None
-  let build_options _program _device = ""
-  let build_log _program _device = ""
+
+  let build_options program device =
+    Info.string (C.clGetProgramBuildInfo program device
+                   T._CL_PROGRAM_BUILD_OPTIONS)
+
+  let build_log program device =
+    Info.string (C.clGetProgramBuildInfo program device T._CL_PROGRAM_BUILD_LOG)
 end
 
 module Kernel = struct
