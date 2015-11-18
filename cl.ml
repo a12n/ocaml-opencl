@@ -572,8 +572,42 @@ module Kernel = struct
       `Local_double |
       `Local_half ]
 
-  (* TODO *)
-  let set_arg _kernel _index _arg_opt = ()
+  let set_arg kernel index arg_opt =
+    let arg_size, arg_value =
+      match arg_opt with
+      | `Char c -> (sizeof T.cl_char,
+                    to_voidp (allocate T.cl_char (Char.code c)))
+      | `Uchar uc -> (sizeof T.cl_uchar,
+                      to_voidp (allocate T.cl_uchar (Unsigned.UInt8.of_int uc)))
+      | `Short s -> (sizeof T.cl_short, to_voidp (allocate T.cl_short s))
+      | `Ushort us ->
+        (sizeof T.cl_ushort,
+         to_voidp (allocate T.cl_ushort (Unsigned.UInt16.of_int us)))
+      | `Int i -> (sizeof T.cl_int,
+                   to_voidp (allocate T.cl_int (Signed.Int32.of_int i)))
+      | `Uint ui -> (sizeof T.cl_uint,
+                     to_voidp (allocate T.cl_uint (Unsigned.UInt32.of_int ui)))
+      | `Long l -> (sizeof T.cl_long,
+                    to_voidp (allocate T.cl_long (Signed.Int64.of_int64 l)))
+      | `Ulong ul ->
+        (sizeof T.cl_ulong,
+         to_voidp (allocate T.cl_ulong (Unsigned.UInt64.of_int64 ul)))
+      | `Float f -> (sizeof T.cl_float, to_voidp (allocate T.cl_float f))
+      | `Double d -> (sizeof T.cl_double, to_voidp (allocate T.cl_double d))
+      | `Half h -> (sizeof T.cl_half,
+                    to_voidp (allocate T.cl_half (Unsigned.UInt16.of_int h)))
+      | `Mem m -> (sizeof T.cl_mem, to_voidp (allocate T.cl_mem m))
+      | `Null_mem -> (sizeof T.cl_mem, null)
+      | `Sampler s -> (sizeof T.cl_sampler, to_voidp (allocate T.cl_sampler s))
+      | `Local_char -> (sizeof T.cl_char, null)
+      | `Local_short -> (sizeof T.cl_short, null)
+      | `Local_int -> (sizeof T.cl_int, null)
+      | `Local_long -> (sizeof T.cl_long, null)
+      | `Local_float -> (sizeof T.cl_float, null)
+      | `Local_double -> (sizeof T.cl_double, null)
+      | `Local_half -> (sizeof T.cl_half, null) in
+    C.clSetKernelArg kernel (Unsigned.UInt32.of_int index)
+      (Unsigned.Size_t.of_int arg_size) arg_value |> check_error
 
   (* TODO *)
   let function_name _kernel = ""
