@@ -64,8 +64,57 @@ type error =
   | Invalid_mip_level
   | Invalid_global_work_size
 
-(* TODO *)
-let to_error = function _any -> Device_not_found
+let to_error = function
+  | n when n = T._CL_DEVICE_NOT_FOUND -> Device_not_found
+  | n when n = T._CL_DEVICE_NOT_AVAILABLE -> Device_not_available
+  | n when n = T._CL_COMPILER_NOT_AVAILABLE -> Compiler_not_available
+  | n when n = T._CL_MEM_OBJECT_ALLOCATION_FAILURE ->
+    Mem_object_allocation_failure
+  | n when n = T._CL_OUT_OF_RESOURCES -> Out_of_resources
+  | n when n = T._CL_OUT_OF_HOST_MEMORY -> Out_of_host_memory
+  | n when n = T._CL_PROFILING_INFO_NOT_AVAILABLE ->
+    Profiling_info_not_available
+  | n when n = T._CL_MEM_COPY_OVERLAP -> Mem_copy_overlap
+  | n when n = T._CL_IMAGE_FORMAT_MISMATCH -> Image_format_mismatch
+  | n when n = T._CL_IMAGE_FORMAT_NOT_SUPPORTED -> Image_format_not_supported
+  | n when n = T._CL_BUILD_PROGRAM_FAILURE -> Build_program_failure
+  | n when n = T._CL_MAP_FAILURE -> Map_failure
+  | n when n = T._CL_INVALID_VALUE -> Invalid_value
+  | n when n = T._CL_INVALID_DEVICE_TYPE -> Invalid_device_type
+  | n when n = T._CL_INVALID_PLATFORM -> Invalid_platform
+  | n when n = T._CL_INVALID_DEVICE -> Invalid_device
+  | n when n = T._CL_INVALID_CONTEXT -> Invalid_context
+  | n when n = T._CL_INVALID_QUEUE_PROPERTIES -> Invalid_queue_properties
+  | n when n = T._CL_INVALID_COMMAND_QUEUE -> Invalid_command_queue
+  | n when n = T._CL_INVALID_HOST_PTR -> Invalid_host_ptr
+  | n when n = T._CL_INVALID_MEM_OBJECT -> Invalid_mem_object
+  | n when n = T._CL_INVALID_IMAGE_FORMAT_DESCRIPTOR ->
+    Invalid_image_format_descriptor
+  | n when n = T._CL_INVALID_IMAGE_SIZE -> Invalid_image_size
+  | n when n = T._CL_INVALID_SAMPLER -> Invalid_sampler
+  | n when n = T._CL_INVALID_BINARY -> Invalid_binary
+  | n when n = T._CL_INVALID_BUILD_OPTIONS -> Invalid_build_options
+  | n when n = T._CL_INVALID_PROGRAM -> Invalid_program
+  | n when n = T._CL_INVALID_PROGRAM_EXECUTABLE -> Invalid_program_executable
+  | n when n = T._CL_INVALID_KERNEL_NAME -> Invalid_kernel_name
+  | n when n = T._CL_INVALID_KERNEL_DEFINITION -> Invalid_kernel_definition
+  | n when n = T._CL_INVALID_KERNEL -> Invalid_kernel
+  | n when n = T._CL_INVALID_ARG_INDEX -> Invalid_arg_index
+  | n when n = T._CL_INVALID_ARG_VALUE -> Invalid_arg_value
+  | n when n = T._CL_INVALID_ARG_SIZE -> Invalid_arg_size
+  | n when n = T._CL_INVALID_KERNEL_ARGS -> Invalid_kernel_args
+  | n when n = T._CL_INVALID_WORK_DIMENSION -> Invalid_work_dimension
+  | n when n = T._CL_INVALID_WORK_GROUP_SIZE -> Invalid_work_group_size
+  | n when n = T._CL_INVALID_WORK_ITEM_SIZE -> Invalid_work_item_size
+  | n when n = T._CL_INVALID_GLOBAL_OFFSET -> Invalid_global_offset
+  | n when n = T._CL_INVALID_EVENT_WAIT_LIST -> Invalid_event_wait_list
+  | n when n = T._CL_INVALID_EVENT -> Invalid_event
+  | n when n = T._CL_INVALID_OPERATION -> Invalid_operation
+  | n when n = T._CL_INVALID_GL_OBJECT -> Invalid_gl_object
+  | n when n = T._CL_INVALID_BUFFER_SIZE -> Invalid_buffer_size
+  | n when n = T._CL_INVALID_MIP_LEVEL -> Invalid_mip_level
+  | n when n = T._CL_INVALID_GLOBAL_WORK_SIZE -> Invalid_global_work_size
+  | _other -> failwith "Cl.to_error"
 
 exception Exn of error
 
