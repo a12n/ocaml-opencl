@@ -458,9 +458,23 @@ module Sampler = struct
   type filter_mode =
     [ `Nearest | `Linear ]
 
-  (* TODO *)
-  let create _context _norm_coords _addressing _filter =
-    from_voidp T._cl_sampler null
+  let create context norm_coords addressing filter =
+    let normalized_coords = of_bool norm_coords in
+    let addressing_mode =
+      match addressing with
+      | None -> T._CL_ADDRESS_NONE
+      | Some `Clamp_to_edge -> T._CL_ADDRESS_CLAMP_TO_EDGE
+      | Some `Clamp -> T._CL_ADDRESS_CLAMP
+      | Some `Repeat -> T._CL_ADDRESS_REPEAT in
+    let filter_mode =
+      match filter with
+      | `Nearest -> T._CL_FILTER_NEAREST
+      | `Linear -> T._CL_FILTER_LINEAR in
+    let err = allocate T.cl_int T._CL_SUCCESS in
+    let sampler = C.clCreateSampler context normalized_coords
+        addressing_mode filter_mode err in
+    check_error (!@ err);
+    sampler
 
   (* TODO *)
   let context _sampler = from_voidp T._cl_context null
