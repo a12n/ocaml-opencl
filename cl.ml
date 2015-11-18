@@ -544,7 +544,7 @@ module Kernel = struct
     check_error (!@ err);
     kernel
 
-  let create_in_program program =
+  let create_all program =
     let num_kernels = allocate T.cl_uint Unsigned.UInt32.zero in
     C.clCreateKernelsInProgram program Unsigned.UInt32.zero
       (from_voidp T.cl_kernel null) num_kernels |> check_error;
