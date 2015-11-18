@@ -538,9 +538,21 @@ module Program = struct
 end
 
 module Kernel = struct
-  (* TODO *)
-  let create _program _kernel_name = from_voidp T._cl_kernel null
-  let create_in_program _program = []
+  let create program kernel_name =
+    let err = allocate T.cl_int T._CL_SUCCESS in
+    let kernel = C.clCreateKernel program kernel_name err in
+    check_error (!@ err);
+    kernel
+
+  let create_in_program program =
+    let num_kernels = allocate T.cl_uint Unsigned.UInt32.zero in
+    C.clCreateKernelsInProgram program Unsigned.UInt32.zero
+      (from_voidp T.cl_kernel null) num_kernels |> check_error;
+    let kernels = CArray.make T.cl_kernel
+        (Unsigned.UInt32.to_int (!@ num_kernels)) in
+    C.clCreateKernelsInProgram program (!@ num_kernels) (CArray.start kernels)
+      (from_voidp T.cl_uint null) |> check_error;
+    CArray.to_list kernels
 
   type 'k arg =
     [ `Char of char | `Uchar of int |
