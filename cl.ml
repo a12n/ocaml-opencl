@@ -612,8 +612,10 @@ module Mem = struct
       Gc_ext.link_opt mem ba_opt;
     mem
 
+  let context mem =
+    Info.value (C.clGetMemObjectInfo mem T._CL_MEM_CONTEXT) T.cl_context
+
   (* TODO *)
-  let context _mem = from_voidp T._cl_context null
   let flags _mem = []
   let map_count _mem = 0
   let mem_type _mem = `Buffer
