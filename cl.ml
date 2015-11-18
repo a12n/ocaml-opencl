@@ -172,6 +172,8 @@ module Info = struct
       (to_voidp (CArray.start param_value))
       (from_voidp size_t null) |> check_error;
     CArray.get param_value 0
+
+  let bool info_function = value info_function T.cl_bool |> to_bool
 end
 
 module Platform = struct
@@ -864,8 +866,7 @@ module Sampler = struct
     | _other -> failwith "Cl.Sampler.filter_mode"
 
   let normalized_coords sampler =
-    Info.value (C.clGetSamplerInfo sampler T._CL_SAMPLER_NORMALIZED_COORDS)
-      T.cl_bool |> to_bool
+    Info.bool (C.clGetSamplerInfo sampler T._CL_SAMPLER_NORMALIZED_COORDS)
 end
 
 module Program = struct
