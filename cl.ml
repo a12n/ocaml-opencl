@@ -197,8 +197,7 @@ module Command_queue = struct
      There seems to be no way to guarantee that bigarray will be
      reachable for the duration of the operation. *)
 
-  let read_buffer ?(wait_list=[]) ?(blocking=true) ?(offset=0) ?size
-      queue mem ba =
+  let rw_buffer ?size c_function wait_list blocking offset queue mem ba =
     let blocking = T._CL_TRUE in
     let array = array_of_bigarray genarray ba in
     let size = match size with
@@ -206,27 +205,17 @@ module Command_queue = struct
       | None -> CArray.length array * (sizeof (CArray.element_type array)) in
     let wait_list = CArray.of_list T.cl_event wait_list in
     let event = allocate T.cl_event (from_voidp T._cl_event null) in
-    C.clEnqueueReadBuffer queue mem blocking (Unsigned.Size_t.of_int offset)
+    c_function queue mem blocking (Unsigned.Size_t.of_int offset)
       (Unsigned.Size_t.of_int size) (to_voidp (CArray.start array))
       (Unsigned.UInt32.of_int (CArray.length wait_list))
       (CArray.start wait_list) event |> check_error;
     !@ event
 
-  (* XXX: Duplicates code from read_buffer. *)
-  let write_buffer ?(wait_list=[]) ?(blocking=true) ?(offset=0) ?size
-      queue mem ba =
-    let blocking = T._CL_TRUE in
-    let array = array_of_bigarray genarray ba in
-    let size = match size with
-      | Some n -> n
-      | None -> CArray.length array * (sizeof (CArray.element_type array)) in
-    let wait_list = CArray.of_list T.cl_event wait_list in
-    let event = allocate T.cl_event (from_voidp T._cl_event null) in
-    C.clEnqueueWriteBuffer queue mem blocking (Unsigned.Size_t.of_int offset)
-      (Unsigned.Size_t.of_int size) (to_voidp (CArray.start array))
-      (Unsigned.UInt32.of_int (CArray.length wait_list))
-      (CArray.start wait_list) event |> check_error;
-    !@ event
+  let read_buffer ?(wait_list=[]) ?(blocking=true) ?(offset=0) ?size =
+    rw_buffer ?size C.clEnqueueReadBuffer wait_list blocking offset
+
+  let write_buffer ?(wait_list=[]) ?(blocking=true) ?(offset=0) ?size =
+    rw_buffer ?size C.clEnqueueWriteBuffer wait_list blocking offset
 
   let copy_buffer ?(wait_list=[]) queue ~src_buffer ~dst_buffer
       ~src_offset ~dst_offset ~size =
