@@ -1064,8 +1064,11 @@ module Event = struct
     C.clWaitForEvents (Unsigned.UInt32.of_int (CArray.length events))
       (CArray.start events) |> check_error
 
+  let command_queue event =
+    Info.value (C.clGetEventInfo event T._CL_EVENT_COMMAND_QUEUE)
+      T.cl_command_queue
+
   (* TODO *)
-  let command_queue _event = from_voidp T._cl_command_queue null
   let command_type _event = `Marker
   let command_execution_status _event = `Complete
 
