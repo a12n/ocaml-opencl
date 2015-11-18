@@ -934,9 +934,11 @@ module Program = struct
     C.clBuildProgram program (Unsigned.UInt32.of_int (CArray.length devices))
       (CArray.start devices) options notify null |> check_error
 
-  (* TODO *)
-  let context _program = from_voidp T._cl_context null
-  let devices _program = []
+  let context program =
+    Info.value (C.clGetProgramInfo program T._CL_PROGRAM_CONTEXT) T.cl_context
+
+  let devices program =
+    Info.list (C.clGetProgramInfo program T._CL_PROGRAM_DEVICES) T.cl_device_id
 
   let source program =
     Info.string (C.clGetProgramInfo program T._CL_PROGRAM_SOURCE)
@@ -1032,8 +1034,6 @@ module Kernel = struct
 
   (* TODO *)
   let num_args _kernel = 0
-  let context _kernel = from_voidp T._cl_context null
-  let program _kernel = from_voidp T._cl_program null
 
   let work_group_size _kernel _device = 0
   let compile_work_group_size _kernel _device = 0, 0, 0
