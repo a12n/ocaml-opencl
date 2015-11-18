@@ -788,13 +788,29 @@ module Mem = struct
     Info.value (C.clGetImageInfo mem T._CL_IMAGE_FORMAT)
       T.cl_image_format |> to_image_format
 
-  (* TODO *)
-  let image_element_size _mem = 0
-  let image_row_pitch _mem = 0
-  let image_slice_pitch _mem = 0
-  let image_width _mem = 0
-  let image_height _mem = 0
-  let image_depth _mem = 0
+  let image_element_size mem =
+    Info.value (C.clGetImageInfo mem T._CL_IMAGE_ELEMENT_SIZE)
+      size_t |> Unsigned.Size_t.to_int
+
+  let image_row_pitch mem =
+    Info.value (C.clGetImageInfo mem T._CL_IMAGE_ROW_PITCH)
+      size_t |> Unsigned.Size_t.to_int
+
+  let image_slice_pitch mem =
+    Info.value (C.clGetImageInfo mem T._CL_IMAGE_SLICE_PITCH)
+      size_t |> Unsigned.Size_t.to_int
+
+  let image_width mem =
+    Info.value (C.clGetImageInfo mem T._CL_IMAGE_WIDTH)
+      size_t |> Unsigned.Size_t.to_int
+
+  let image_height mem =
+    Info.value (C.clGetImageInfo mem T._CL_IMAGE_HEIGHT)
+      size_t |> Unsigned.Size_t.to_int
+
+  let image_depth mem =
+    Info.value (C.clGetImageInfo mem T._CL_IMAGE_DEPTH)
+      size_t |> Unsigned.Size_t.to_int
 end
 
 module Sampler = struct
