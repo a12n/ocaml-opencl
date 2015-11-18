@@ -67,8 +67,15 @@ type error =
 exception Exn of error
 
 module Platform = struct
-  (* TODO *)
-  let get () = []
+  let get () =
+    let num_platforms = allocate T.cl_uint Unsigned.UInt32.zero in
+    C.clGetPlatformIDs Unsigned.UInt32.zero (from_voidp T.cl_platform_id null)
+      num_platforms |> ignore;
+    let platforms = CArray.make T.cl_platform_id
+        (Unsigned.UInt32.to_int (!@ num_platforms)) in
+    C.clGetPlatformIDs (!@ num_platforms) (CArray.start platforms)
+      (from_voidp T.cl_uint null) |> ignore;
+    CArray.to_list platforms
 
   (* TODO *)
   let extensions _platform = ""
