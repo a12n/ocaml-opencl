@@ -159,10 +159,10 @@ module Info = struct
   let array info_function typ = carray info_function typ |> CArray_ext.to_array
 
   let string info_function =
-    let chars = array info_function char in
-    match Array.length chars with
-    | 0 -> ""
-    | n -> String.init (n - 1) (Array.get chars)
+    let chars = carray info_function char in
+    match CArray.length chars - 1 with
+    | length when length > 0 -> string_from_ptr ~length (CArray.start chars)
+    | _other -> ""
 end
 
 module Platform = struct
