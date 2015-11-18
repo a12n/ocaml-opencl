@@ -659,9 +659,23 @@ module Mem = struct
       Gc_ext.link_opt mem ba_opt;
     mem
 
-  (* TODO *)
-  let create_image3d ?(row_pitch=0) ?(slice_pitch=0) _context _flags _format
-      ~width ~height ~depth _ba_opt = from_voidp T._cl_mem null
+  let create_image3d ?(row_pitch=0) ?(slice_pitch=0) context flags format ~width
+      ~height ~depth ba_opt =
+    let flags = of_flag_list flags in
+    let image_format = of_image_format format in
+    let host_ptr, row_pitch, slice_pitch =
+      match ba_opt with
+      | Some ba -> to_voidp (bigarray_start genarray ba), row_pitch, slice_pitch
+      | None -> null, 0, 0 in
+    let err = allocate T.cl_int T._CL_SUCCESS in
+    let mem = C.clCreateImage3D context flags (addr image_format)
+        (Unsigned.Size_t.of_int width) (Unsigned.Size_t.of_int height)
+        (Unsigned.Size_t.of_int depth) (Unsigned.Size_t.of_int row_pitch)
+        (Unsigned.Size_t.of_int slice_pitch) host_ptr err in
+    check_error (!@ err);
+    if Unsigned.UInt64.(logand flags T._CL_MEM_USE_HOST_PTR <> zero) then
+      Gc_ext.link_opt mem ba_opt;
+    mem
 
   let supported_image_formats context flags mem_type =
     let flags = of_flag_list flags in
