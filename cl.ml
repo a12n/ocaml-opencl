@@ -369,27 +369,37 @@ module Context = struct
     List.fold_right (@)
       (List.map of_property properties) [Nativeint.zero]
 
-  (* TODO: notify closure *)
+  let notify_proxy callback err_info _priv_data _size _user_data =
+    (* TODO: Make bytes of priv data and pass it to callback *)
+    callback err_info Bytes.empty
+
   let create ?notify properties devices =
     let properties = CArray.of_list T.cl_context_properties
         (of_property_list properties) in
     let devices = CArray.of_list T.cl_device_id devices in
+    let notify' = match notify with
+      | Some callback -> Some (notify_proxy callback)
+      | None -> None in
     let err = allocate T.cl_int T._CL_SUCCESS in
     let context = C.clCreateContext (CArray.start properties)
         (Unsigned.UInt32.of_int (CArray.length devices))
-        (CArray.start devices) None null err in
+        (CArray.start devices) notify' null err in
     check_error (!@ err);
+    Gc_ext.link_opt context notify;
     context
 
-  (* TODO: notify closure *)
   let create_from_type ?notify properties device_types =
     let properties = CArray.of_list T.cl_context_properties
         (of_property_list properties) in
     let device_type = Device.of_device_type_list device_types in
+    let notify' = match notify with
+      | Some callback -> Some (notify_proxy callback)
+      | None -> None in
     let err = allocate T.cl_int T._CL_SUCCESS in
     let context = C.clCreateContextFromType (CArray.start properties)
-        device_type None null err in
+        device_type notify' null err in
     check_error (!@ err);
+    Gc_ext.link_opt context notify;
     context
 
   (* TODO *)
