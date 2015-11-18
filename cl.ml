@@ -842,9 +842,26 @@ module Sampler = struct
 
   (* TODO *)
   let context _sampler = from_voidp T._cl_context null
-  let addressing_mode _sampler = None
-  let filter_mode _sampler = `Nearest
-  let normalized_coords _sampler = false
+
+  let addressing_mode sampler =
+    Info.value (C.clGetSamplerInfo sampler T._CL_SAMPLER_ADDRESSING_MODE)
+      T.cl_addressing_mode |> function
+    | c when c = T._CL_ADDRESS_NONE -> None
+    | c when c = T._CL_ADDRESS_CLAMP_TO_EDGE -> Some `Clamp_to_edge
+    | c when c = T._CL_ADDRESS_CLAMP -> Some `Clamp
+    | c when c = T._CL_ADDRESS_REPEAT -> Some `Repeat
+    | _other -> failwith "Cl.Sampler.addressing_mode"
+
+  let filter_mode sampler =
+    Info.value (C.clGetSamplerInfo sampler T._CL_SAMPLER_FILTER_MODE)
+      T.cl_filter_mode |> function
+    | c when c = T._CL_FILTER_NEAREST -> `Nearest
+    | c when c = T._CL_FILTER_LINEAR -> `Linear
+    | _other -> failwith "Cl.Sampler.filter_mode"
+
+  let normalized_coords sampler =
+    Info.value (C.clGetSamplerInfo sampler T._CL_SAMPLER_NORMALIZED_COORDS)
+      T.cl_bool |> to_bool
 end
 
 module Program = struct
