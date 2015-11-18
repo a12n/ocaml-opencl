@@ -227,9 +227,19 @@ module Command_queue = struct
       (CArray.start wait_list) event |> check_error;
     !@ event
 
-  (* TODO *)
-  let copy_image_to_buffer ?(wait_list=[]) _queue ~src_image
-      ~dst_buffer ~src_origin ~region ~dst_offset = from_voidp T._cl_event null
+  let copy_image_to_buffer ?(wait_list=[]) queue ~src_image
+      ~dst_buffer ~src_origin ~region ~dst_offset =
+    let src_origin =
+      tuple3_to_carray size_t Unsigned.Size_t.of_int src_origin in
+    let region = tuple3_to_carray size_t Unsigned.Size_t.of_int region in
+    let wait_list = CArray.of_list T.cl_event wait_list in
+    let event = allocate T.cl_event (from_voidp T._cl_event null) in
+    C.clEnqueueCopyImageToBuffer queue src_image dst_buffer
+      (CArray.start src_origin) (CArray.start region)
+      (Unsigned.Size_t.of_int dst_offset)
+      (Unsigned.UInt32.of_int (CArray.length wait_list))
+      (CArray.start wait_list) event |> check_error;
+    !@ event
 
   (* TODO *)
   let copy_buffer_to_image ?(wait_list=[]) _queue ~src_buffer
