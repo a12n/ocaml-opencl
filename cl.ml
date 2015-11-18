@@ -197,6 +197,9 @@ module Command_queue = struct
      There seems to be no way to guarantee that bigarray will be
      reachable for the duration of the operation. *)
 
+  let tuple3_to_carray typ conv (x, y, z) =
+    CArray_ext.of_array typ [|conv x; conv y; conv z|]
+
   let rw_buffer ?size c_function wait_list blocking offset queue mem ba =
     let blocking = T._CL_TRUE in
     let array = array_of_bigarray genarray ba in
@@ -228,18 +231,29 @@ module Command_queue = struct
       (CArray.start wait_list) event |> check_error;
     !@ event
 
-  (* TODO *)
+  let rw_image c_function wait_list blocking row_pitch slice_pitch
+      queue mem origin region ba =
+    let blocking = T._CL_TRUE in
+    let origin = tuple3_to_carray size_t Unsigned.Size_t.of_int origin in
+    let region = tuple3_to_carray size_t Unsigned.Size_t.of_int region in
+    let wait_list = CArray.of_list T.cl_event wait_list in
+    let event = allocate T.cl_event (from_voidp T._cl_event null) in
+    c_function queue mem blocking (CArray.start origin) (CArray.start region)
+      (Unsigned.Size_t.of_int row_pitch) (Unsigned.Size_t.of_int slice_pitch)
+      (to_voidp (bigarray_start genarray ba))
+      (Unsigned.UInt32.of_int (CArray.length wait_list))
+      (CArray.start wait_list) event |> check_error;
+    !@ event
+
   let read_image ?(wait_list=[]) ?(blocking=true) ?(row_pitch=0)
-      ?(slice_pitch=0) _queue _mem ~origin ~region _ba =
-    from_voidp T._cl_event null
+      ?(slice_pitch=0) queue mem ~origin ~region ba =
+    rw_image C.clEnqueueReadImage wait_list blocking row_pitch slice_pitch
+      queue mem origin region ba
 
-  (* TODO *)
   let write_image ?(wait_list=[]) ?(blocking=true) ?(row_pitch=0)
-      ?(slice_pitch=0) _queue _mem ~origin ~region _ba =
-    from_voidp T._cl_event null
-
-  let tuple3_to_carray typ conv (x, y, z) =
-    CArray_ext.of_array typ [|conv x; conv y; conv z|]
+      ?(slice_pitch=0) queue mem ~origin ~region ba =
+    rw_image C.clEnqueueWriteImage wait_list blocking row_pitch slice_pitch
+      queue mem origin region ba
 
   let copy_image ?(wait_list=[]) queue ~src_image ~dst_image
       ~src_origin ~dst_origin ~region =
