@@ -309,6 +309,15 @@ module Mem = struct
     [ `Read_write | `Write_only | `Read_only |
       `Use_host_ptr | `Alloc_host_ptr | `Copy_host_ptr ]
 
+  let cl_mem_flags_of_flag_list flags =
+    List.fold_left Unsigned.UInt64.add Unsigned.UInt64.zero
+      (List.map (function `Read_write -> T._CL_MEM_READ_WRITE
+                        | `Write_only -> T._CL_MEM_WRITE_ONLY
+                        | `Read_only -> T._CL_MEM_READ_ONLY
+                        | `Use_host_ptr -> T._CL_MEM_USE_HOST_PTR
+                        | `Alloc_host_ptr -> T._CL_MEM_ALLOC_HOST_PTR
+                        | `Copy_host_ptr -> T._CL_MEM_COPY_HOST_PTR) flags)
+
   type mem_type =
     [ `Buffer | `Image2d | `Image3d ]
 
