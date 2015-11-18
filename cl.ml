@@ -840,8 +840,8 @@ module Sampler = struct
     check_error (!@ err);
     sampler
 
-  (* TODO *)
-  let context _sampler = from_voidp T._cl_context null
+  let context sampler =
+    Info.value (C.clGetSamplerInfo sampler T._CL_SAMPLER_CONTEXT) T.cl_context
 
   let addressing_mode sampler =
     Info.value (C.clGetSamplerInfo sampler T._CL_SAMPLER_ADDRESSING_MODE)
