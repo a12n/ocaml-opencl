@@ -519,8 +519,11 @@ module Program = struct
     check_error (!@ err);
     program, List.map to_binary_status (CArray.to_list binary_status)
 
-  (* TODO *)
-  let build ?notify _program _devices _options = ()
+  let build ?notify program devices options =
+    let devices = CArray.of_list T.cl_device_id devices in
+    let notify = None in        (* TODO *)
+    C.clBuildProgram program (Unsigned.UInt32.of_int (CArray.length devices))
+      (CArray.start devices) options notify null |> check_error
 
   (* TODO *)
   let context _program = from_voidp T._cl_context null
