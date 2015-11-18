@@ -560,8 +560,10 @@ module Context = struct
     Gc_ext.link_opt context notify;
     context
 
+  let devices context =
+    Info.list (C.clGetContextInfo context T._CL_CONTEXT_DEVICES) T.cl_device_id
+
   (* TODO *)
-  let devices _context = []
   let properties _context = []
 end
 
