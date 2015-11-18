@@ -632,8 +632,10 @@ module Event = struct
   type command_execution_status =
     [ `Queued | `Submitted | `Running | `Complete | `Error of int ]
 
-  (* TODO *)
-  let wait _wait_list = ()
+  let wait events =
+    let events = CArray.of_list T.cl_event events in
+    C.clWaitForEvents (Unsigned.UInt32.of_int (CArray.length events))
+      (CArray.start events) |> check_error
 
   (* TODO *)
   let command_queue _event = from_voidp T._cl_command_queue null
