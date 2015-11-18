@@ -473,12 +473,20 @@ module Device = struct
   let profiling_timer_resolution _device = 0
   let vendor_id _device = 0
 
-  (* TODO *)
-  let available _device = false
-  let compiler_available _device = false
-  let endian_little _device = false
-  let error_correction_support _device = false
-  let image_support _device = false
+  let available device =
+    Info.bool (C.clGetDeviceInfo device T._CL_DEVICE_AVAILABLE)
+
+  let compiler_available device =
+    Info.bool (C.clGetDeviceInfo device T._CL_DEVICE_COMPILER_AVAILABLE)
+
+  let endian_little device =
+    Info.bool (C.clGetDeviceInfo device T._CL_DEVICE_ENDIAN_LITTLE)
+
+  let error_correction_support device =
+    Info.bool (C.clGetDeviceInfo device T._CL_DEVICE_ERROR_CORRECTION_SUPPORT)
+
+  let image_support device =
+    Info.bool (C.clGetDeviceInfo device T._CL_DEVICE_IMAGE_SUPPORT)
 
   (* TODO *)
   let single_fp_config _device =
