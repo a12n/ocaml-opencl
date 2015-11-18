@@ -209,9 +209,23 @@ module Command_queue = struct
       ?(slice_pitch=0) _queue _mem ~origin ~region _ba =
     from_voidp T._cl_event null
 
-  (* TODO *)
-  let copy_image ?(wait_list=[]) _queue ~src_image ~dst_image
-      ~src_origin ~dst_origin ~region = from_voidp T._cl_event null
+  let tuple3_to_carray typ conv (x, y, z) =
+    CArray_ext.of_array typ [|conv x; conv y; conv z|]
+
+  let copy_image ?(wait_list=[]) queue ~src_image ~dst_image
+      ~src_origin ~dst_origin ~region =
+    let src_origin =
+      tuple3_to_carray size_t Unsigned.Size_t.of_int src_origin in
+    let dst_origin =
+      tuple3_to_carray size_t Unsigned.Size_t.of_int dst_origin in
+    let region = tuple3_to_carray size_t Unsigned.Size_t.of_int region in
+    let wait_list = CArray.of_list T.cl_event wait_list in
+    let event = allocate T.cl_event (from_voidp T._cl_event null) in
+    C.clEnqueueCopyImage queue src_image dst_image (CArray.start src_origin)
+      (CArray.start dst_origin) (CArray.start region)
+      (Unsigned.UInt32.of_int (CArray.length wait_list))
+      (CArray.start wait_list) event |> check_error;
+    !@ event
 
   (* TODO *)
   let copy_image_to_buffer ?(wait_list=[]) _queue ~src_image
