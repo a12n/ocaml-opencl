@@ -619,7 +619,14 @@ module Program = struct
 
   let build ?notify program devices options =
     let devices = CArray.of_list T.cl_device_id devices in
-    let notify = None in        (* TODO *)
+    let notify = match notify with
+      | Some callback ->
+        ( Gc_ext.link program callback;
+          (* TODO: Notify is called only once. Unlink after it's being
+             called, instead of keeping it for the lifetime of the
+             program. *)
+          Some (fun program _user_data -> callback program) )
+      | None -> None in
     C.clBuildProgram program (Unsigned.UInt32.of_int (CArray.length devices))
       (CArray.start devices) options notify null |> check_error
 
