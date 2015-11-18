@@ -560,7 +560,7 @@ module Kernel = struct
       `Int of int | `Uint of int |
       `Long of int64 | `Ulong of int64 |
       `Float of float | `Double of float | `Half of int |
-      `Mem of 'k mem |
+      `Mem of 'k mem | `Null_mem |
       `Sampler of sampler ]
 
   type local_arg =
