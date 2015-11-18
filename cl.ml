@@ -783,8 +783,11 @@ module Mem = struct
       (CArray.start image_formats) (from_voidp T.cl_uint null) |> check_error;
     CArray.to_list image_formats |> List.map to_image_format
 
+  let image_format mem =
+    Info.structure (C.clGetImageInfo mem T._CL_IMAGE_FORMAT)
+      T.cl_image_format |> to_image_format
+
   (* TODO *)
-  let image_format _mem = `Intensity `Float
   let image_element_size _mem = 0
   let image_row_pitch _mem = 0
   let image_slice_pitch _mem = 0
