@@ -3,6 +3,16 @@ open Ctypes
 module C = Cl_bindings.Make (Cl_generated)
 module T = Cl_types.Make (Cl_types_detected)
 
+module CArray_ext = struct
+  let of_array typ array =
+    let ans = CArray.make typ (Array.length array) in
+    Array.iteri (fun i v -> CArray.set ans i v) array;
+    ans
+
+  let to_array carray =
+    Array.init (CArray.length carray) (fun i -> CArray.get carray i)
+end
+
 type buffer
 type image
 
