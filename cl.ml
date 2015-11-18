@@ -176,7 +176,7 @@ module Device = struct
     fma : bool;
   }
 
-  let cl_device_type_of_device_type_list list =
+  let of_device_type_list list =
     List.fold_left Unsigned.UInt64.add Unsigned.UInt64.zero
       (List.map (function `Default -> T._CL_DEVICE_TYPE_DEFAULT
                         | `Cpu -> T._CL_DEVICE_TYPE_CPU
@@ -185,7 +185,7 @@ module Device = struct
                         | `All -> T._CL_DEVICE_TYPE_ALL) list)
 
   let get platform device_types =
-    let device_type = cl_device_type_of_device_type_list device_types in
+    let device_type = of_device_type_list device_types in
     let num_devices = allocate T.cl_uint Unsigned.UInt32.zero in
     C.clGetDeviceIDs platform device_type Unsigned.UInt32.zero
       (from_voidp T.cl_device_id null) num_devices |> check_error;
@@ -268,18 +268,18 @@ module Context = struct
   type property =
     [ `Platform of platform ]
 
-  let cl_context_properties_of_property = function `Platform platform ->
+  let of_property = function `Platform platform ->
     [ Unsigned.UInt32.to_int T._CL_CONTEXT_PLATFORM |> Nativeint.of_int;
       raw_address_of_ptr (to_voidp platform) ]
 
-  let cl_context_properties_of_property_list list =
+  let of_property_list properties =
     List.fold_right (@)
-      (List.map cl_context_properties_of_property list) [Nativeint.zero]
+      (List.map of_property properties) [Nativeint.zero]
 
   (* TODO: notify closure *)
   let create ?notify properties devices =
     let properties = CArray.of_list T.cl_context_properties
-        (cl_context_properties_of_property_list properties) in
+        (of_property_list properties) in
     let devices = CArray.of_list T.cl_device_id devices in
     let err = allocate T.cl_int T._CL_SUCCESS in
     let context = C.clCreateContext (CArray.start properties)
@@ -291,8 +291,8 @@ module Context = struct
   (* TODO: notify closure *)
   let create_from_type ?notify properties device_types =
     let properties = CArray.of_list T.cl_context_properties
-        (cl_context_properties_of_property_list properties) in
-    let device_type = Device.cl_device_type_of_device_type_list device_types in
+        (of_property_list properties) in
+    let device_type = Device.of_device_type_list device_types in
     let err = allocate T.cl_int T._CL_SUCCESS in
     let context = C.clCreateContextFromType (CArray.start properties)
         device_type None null err in
@@ -309,7 +309,7 @@ module Mem = struct
     [ `Read_write | `Write_only | `Read_only |
       `Use_host_ptr | `Alloc_host_ptr | `Copy_host_ptr ]
 
-  let cl_mem_flags_of_flag_list flags =
+  let of_flag_list flags =
     List.fold_left Unsigned.UInt64.add Unsigned.UInt64.zero
       (List.map (function `Read_write -> T._CL_MEM_READ_WRITE
                         | `Write_only -> T._CL_MEM_WRITE_ONLY
@@ -321,7 +321,7 @@ module Mem = struct
   type mem_type =
     [ `Buffer | `Image2d | `Image3d ]
 
-  let cl_mem_object_type_of_mem_type = function
+  let of_mem_type = function
     | `Buffer -> T._CL_MEM_OBJECT_BUFFER
     | `Image2d -> T._CL_MEM_OBJECT_IMAGE2D
     | `Image3d -> T._CL_MEM_OBJECT_IMAGE3D
@@ -366,7 +366,7 @@ module Mem = struct
       `Bgra of argb_channel_type ]
 
   (* TODO *)
-  let image_format_of_cl_image_format _ = `R `Float
+  let to_image_format _ = `R `Float
 
   (* TODO *)
   let create_image2d ?(row_pitch=0) _context _flags _format
@@ -377,8 +377,8 @@ module Mem = struct
       ~width ~height ~depth _ba_opt = from_voidp T._cl_mem null
 
   let supported_image_formats context flags mem_type =
-    let flags = cl_mem_flags_of_flag_list flags in
-    let image_type = cl_mem_object_type_of_mem_type mem_type in
+    let flags = of_flag_list flags in
+    let image_type = of_mem_type mem_type in
     let num_image_formats = allocate T.cl_uint Unsigned.UInt32.zero in
     C.clGetSupportedImageFormats context flags image_type Unsigned.UInt32.zero
       (from_voidp T.cl_image_format null) num_image_formats |> check_error;
@@ -386,7 +386,7 @@ module Mem = struct
         (Unsigned.UInt32.to_int (!@ num_image_formats)) in
     C.clGetSupportedImageFormats context flags image_type (!@ num_image_formats)
       (CArray.start image_formats) (from_voidp T.cl_uint null) |> check_error;
-    CArray.to_list image_formats |> List.map image_format_of_cl_image_format
+    CArray.to_list image_formats |> List.map to_image_format
 
   (* TODO *)
   let image_format _mem = `Intensity `Float
