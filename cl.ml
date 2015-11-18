@@ -366,6 +366,9 @@ module Mem = struct
       `Bgra of argb_channel_type ]
 
   (* TODO *)
+  let image_format_of_cl_image_format _ = `R `Float
+
+  (* TODO *)
   let create_image2d ?(row_pitch=0) _context _flags _format
       ~width ~height _ba_opt = from_voidp T._cl_mem null
 
@@ -373,8 +376,17 @@ module Mem = struct
   let create_image3d ?(row_pitch=0) ?(slice_pitch=0) _context _flags _format
       ~width ~height ~depth _ba_opt = from_voidp T._cl_mem null
 
-  (* TODO *)
-  let supported_image_formats _context _flags _mem_type = []
+  let supported_image_formats context flags mem_type =
+    let flags = cl_mem_flags_of_flag_list flags in
+    let image_type = cl_mem_object_type_of_mem_type mem_type in
+    let num_image_formats = allocate T.cl_uint Unsigned.UInt32.zero in
+    C.clGetSupportedImageFormats context flags image_type Unsigned.UInt32.zero
+      (from_voidp T.cl_image_format null) num_image_formats |> check_error;
+    let image_formats = CArray.make T.cl_image_format
+        (Unsigned.UInt32.to_int (!@ num_image_formats)) in
+    C.clGetSupportedImageFormats context flags image_type (!@ num_image_formats)
+      (CArray.start image_formats) (from_voidp T.cl_uint null) |> check_error;
+    CArray.to_list image_formats |> List.map image_format_of_cl_image_format
 
   (* TODO *)
   let image_format _mem = `Intensity `Float
