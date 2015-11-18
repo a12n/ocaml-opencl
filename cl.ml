@@ -288,9 +288,16 @@ module Context = struct
     check_error (!@ err);
     context
 
-  (* TODO *)
-  let create_from_type ?notify _properties _device_types =
-    from_voidp T._cl_context null
+  (* TODO: notify closure *)
+  let create_from_type ?notify properties device_types =
+    let properties = CArray.of_list T.cl_context_properties
+        (cl_context_properties_of_property_list properties) in
+    let device_type = Device.cl_device_type_of_device_type_list device_types in
+    let err = allocate T.cl_int T._CL_SUCCESS in
+    let context = C.clCreateContextFromType (CArray.start properties)
+        device_type None null err in
+    check_error (!@ err);
+    context
 
   (* TODO *)
   let devices _context = []
