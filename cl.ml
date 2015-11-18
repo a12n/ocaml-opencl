@@ -222,9 +222,13 @@ module Command_queue = struct
     check_error (!@ err);
     queue
 
+  let context queue =
+    Info.value (C.clGetCommandQueueInfo queue T._CL_QUEUE_CONTEXT) T.cl_context
+
+  let device queue =
+    Info.value (C.clGetCommandQueueInfo queue T._CL_QUEUE_DEVICE) T.cl_device_id
+
   (* TODO *)
-  let context _queue = from_voidp T._cl_context null
-  let device _queue = from_voidp T._cl_device_id null
   let properties _queue = []
 
   (* TODO *)
