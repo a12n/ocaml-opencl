@@ -341,17 +341,52 @@ module Mem = struct
       `Snorm_int8 | `Snorm_int16 |
       `Half_float | `Float ]
 
+  let to_intensity_channel_type = function
+    | c when c = T._CL_UNORM_INT8 -> `Unorm_int8
+    | c when c = T._CL_UNORM_INT16 -> `Unorm_int16
+    | c when c = T._CL_SNORM_INT8 -> `Snorm_int8
+    | c when c = T._CL_SNORM_INT16 -> `Snorm_int16
+    | c when c = T._CL_HALF_FLOAT -> `Half_float
+    | c when c = T._CL_FLOAT -> `Float
+    | _other -> failwith "Cl.Mem.to_intensity_channel_type"
+
   type rgb_channel_type =
     [ `Unorm_short_565 | `Unorm_short_555 | `Unorm_int_101010 ]
+
+  let to_rgb_channel_type = function
+    | c when c = T._CL_UNORM_SHORT_565 -> `Unorm_short_565
+    | c when c = T._CL_UNORM_SHORT_555 -> `Unorm_short_555
+    | c when c = T._CL_UNORM_INT_101010 -> `Unorm_int_101010
+    | _other -> failwith "Cl.Mem.to_rgb_channel_type"
 
   type argb_channel_type =
     [ `Unorm_int8 | `Snorm_int8 |
       `Signed_int8 | `Unsigned_int8 ]
 
+  let to_argb_channel_type = function
+    | c when c = T._CL_UNORM_INT8 -> `Unorm_int8
+    | c when c = T._CL_SNORM_INT8 -> `Snorm_int8
+    | c when c = T._CL_SIGNED_INT8 -> `Signed_int8
+    | c when c = T._CL_UNSIGNED_INT8 -> `Unsigned_int8
+    | _other -> failwith "Cl.Mem.to_argb_channel_type"
+
   type channel_type =
     [ intensity_channel_type | rgb_channel_type | argb_channel_type |
       `Signed_int16 | `Signed_int32 |
       `Unsigned_int16 | `Unsigned_int32 ]
+
+  let to_channel_type = function
+    | c when c = T._CL_SIGNED_INT16 -> `Signed_int16
+    | c when c = T._CL_SIGNED_INT32 -> `Signed_int32
+    | c when c = T._CL_UNSIGNED_INT16 -> `Unsigned_int16
+    | c when c = T._CL_UNSIGNED_INT32 -> `Unsigned_int32
+    | data_type ->
+      (try to_intensity_channel_type data_type
+       with Failure _ ->
+         (try to_rgb_channel_type data_type
+          with Failure _ ->
+            (try to_argb_channel_type data_type
+             with Failure _ -> failwith "Cl.Mem.to_channel_type")))
 
   type image_format =
     [ `R of channel_type |
@@ -365,8 +400,23 @@ module Mem = struct
       `Argb of argb_channel_type |
       `Bgra of argb_channel_type ]
 
-  (* TODO *)
-  let to_image_format _ = `R `Float
+  let to_image_format format =
+    let order = getf format T.image_channel_order in
+    let data_type = getf format T.image_channel_data_type in
+    match order with
+    | c when c = T._CL_R -> `R (to_channel_type data_type)
+    | c when c = T._CL_A -> `A (to_channel_type data_type)
+    | c when c = T._CL_INTENSITY ->
+      `Intensity (to_intensity_channel_type data_type)
+    | c when c = T._CL_LUMINANCE ->
+      `Luminance (to_intensity_channel_type data_type)
+    | c when c = T._CL_RG -> `Rg (to_channel_type data_type)
+    | c when c = T._CL_RA -> `Ra (to_channel_type data_type)
+    | c when c = T._CL_RGB -> `Rgb (to_rgb_channel_type data_type)
+    | c when c = T._CL_RGBA -> `Rgba (to_channel_type data_type)
+    | c when c = T._CL_ARGB -> `Argb (to_argb_channel_type data_type)
+    | c when c = T._CL_BGRA -> `Bgra (to_argb_channel_type data_type)
+    | _other -> failwith "Cl.Mem.to_image_format"
 
   (* TODO *)
   let create_image2d ?(row_pitch=0) _context _flags _format
