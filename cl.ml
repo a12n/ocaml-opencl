@@ -6,15 +6,15 @@ module T = Cl_types.Make (Cl_types_detected)
 type buffer
 type image
 
-type platform = unit
-type device = unit
-type context = unit
-type command_queue = unit
-type 'k mem = unit
-type program = unit
-type kernel = unit
-type event = unit
-type sampler = unit
+type platform = T.cl_platform_id
+type device = T.cl_device_id
+type context = T.cl_context
+type command_queue = T.cl_command_queue
+type 'k mem = T.cl_mem
+type program = T.cl_program
+type kernel = T.cl_kernel
+type event = T.cl_event
+type sampler = T.cl_sampler
 
 type error =
   | Device_not_found
@@ -84,11 +84,11 @@ module Command_queue = struct
       `Profiling of bool ]
 
   (* TODO *)
-  let create _context _device _properties = ()
+  let create _context _device _properties = from_voidp T._cl_command_queue null
 
   (* TODO *)
-  let context _queue = ()
-  let device _queue = ()
+  let context _queue = from_voidp T._cl_context null
+  let device _queue = from_voidp T._cl_device_id null
   let properties _queue = []
 
   (* TODO *)
@@ -96,45 +96,48 @@ module Command_queue = struct
 
   (* TODO *)
   let read_buffer ?(wait_list=[]) ?(blocking=true) ?(offset=0) ?size
-      _queue _mem _ba = ()
+      _queue _mem _ba = from_voidp T._cl_event null
 
   (* TODO *)
   let write_buffer ?(wait_list=[]) ?(blocking=true) ?(offset=0) ?size
-      _queue _mem _ba = ()
+      _queue _mem _ba = from_voidp T._cl_event null
 
   (* TODO *)
   let copy_buffer ?(wait_list=[]) _queue ~src_buffer ~dst_buffer
-      ~src_offset ~dst_offset ~size = ()
+      ~src_offset ~dst_offset ~size = from_voidp T._cl_event null
 
   (* TODO *)
   let read_image ?(wait_list=[]) ?(blocking=true) ?(row_pitch=0)
-      ?(slice_pitch=0) _queue _mem ~origin ~region _ba = ()
+      ?(slice_pitch=0) _queue _mem ~origin ~region _ba =
+    from_voidp T._cl_event null
 
   (* TODO *)
   let write_image ?(wait_list=[]) ?(blocking=true) ?(row_pitch=0)
-      ?(slice_pitch=0) _queue _mem ~origin ~region _ba = ()
+      ?(slice_pitch=0) _queue _mem ~origin ~region _ba =
+    from_voidp T._cl_event null
 
   (* TODO *)
   let copy_image ?(wait_list=[]) _queue ~src_image ~dst_image
-      ~src_origin ~dst_origin ~region = ()
+      ~src_origin ~dst_origin ~region = from_voidp T._cl_event null
 
   (* TODO *)
   let copy_image_to_buffer ?(wait_list=[]) _queue ~src_image
-      ~dst_buffer ~src_origin ~region ~dst_offset = ()
+      ~dst_buffer ~src_origin ~region ~dst_offset = from_voidp T._cl_event null
 
   (* TODO *)
   let copy_buffer_to_image ?(wait_list=[]) _queue ~src_buffer
-      ~dst_image ~src_offset ~dst_origin ~region = ()
+      ~dst_image ~src_offset ~dst_origin ~region = from_voidp T._cl_event null
 
   (* TODO *)
   let nd_range_kernel ?(wait_list=[]) ?global_work_offset
-      ?local_work_size _queue _kernel ~global_work_size = ()
+      ?local_work_size _queue _kernel ~global_work_size =
+    from_voidp T._cl_event null
 
   (* TODO *)
-  let task ?(wait_list=[]) _queue _kernel = ()
+  let task ?(wait_list=[]) _queue _kernel = from_voidp T._cl_event null
 
   (* TODO *)
-  let marker _queue = ()
+  let marker _queue = from_voidp T._cl_event null
   let wait_for_events _queue _wait_list = ()
   let barrier _queue = ()
 
@@ -229,7 +232,7 @@ module Device = struct
   let global_mem_cache_type _device = None
   let local_mem_type _device = None
   let max_work_item_sizes _device = [||]
-  let platform _device = ()
+  let platform _device = (from_voidp T._cl_platform_id null)
   let queue_properties _device = []
 end
 
@@ -238,10 +241,11 @@ module Context = struct
     [ `Platform of platform ]
 
   (* TODO *)
-  let create ?notify _properties _devices = ()
+  let create ?notify _properties _devices = from_voidp T._cl_context null
 
   (* TODO *)
-  let create_from_type ?notify _properties _device_types = ()
+  let create_from_type ?notify _properties _device_types =
+    from_voidp T._cl_context null
 
   (* TODO *)
   let devices _context = []
@@ -257,10 +261,10 @@ module Mem = struct
     [ `Buffer | `Image2d | `Image3d ]
 
   (* TODO *)
-  let create_buffer _context _flags _host_data = ()
+  let create_buffer _context _flags _host_data = from_voidp T._cl_mem null
 
   (* TODO *)
-  let context _mem = ()
+  let context _mem = from_voidp T._cl_context null
   let flags _mem = []
   let map_count _mem = 0
   let mem_type _mem = `Buffer
@@ -297,11 +301,11 @@ module Mem = struct
 
   (* TODO *)
   let create_image2d ?(row_pitch=0) _context _flags _format
-      ~width ~height _ba_opt = ()
+      ~width ~height _ba_opt = from_voidp T._cl_mem null
 
   (* TODO *)
   let create_image3d ?(row_pitch=0) ?(slice_pitch=0) _context _flags _format
-      ~width ~height ~depth _ba_opt = ()
+      ~width ~height ~depth _ba_opt = from_voidp T._cl_mem null
 
   (* TODO *)
   let supported_image_formats _context _flags _mem_type = []
@@ -324,10 +328,11 @@ module Sampler = struct
     [ `Nearest | `Linear ]
 
   (* TODO *)
-  let create _context _norm_coords _addressing _filter = ()
+  let create _context _norm_coords _addressing _filter =
+    from_voidp T._cl_sampler null
 
   (* TODO *)
-  let context _sampler = ()
+  let context _sampler = from_voidp T._cl_context null
   let addressing_mode _sampler = None
   let filter_mode _sampler = `Nearest
   let normalized_coords _sampler = false
@@ -335,16 +340,17 @@ end
 
 module Program = struct
   (* TODO *)
-  let create_with_source _context _strings = ()
+  let create_with_source _context _strings = from_voidp T._cl_program null
 
   (* TODO *)
-  let create_with_binary _context _device_binaries = (), []
+  let create_with_binary _context _device_binaries =
+    from_voidp T._cl_program null, []
 
   (* TODO *)
   let build ?notify _program _devices _options = ()
 
   (* TODO *)
-  let context _program = ()
+  let context _program = from_voidp T._cl_context null
   let devices _program = []
   let source _program = ""
   let binaries _program = []
@@ -357,7 +363,7 @@ end
 
 module Kernel = struct
   (* TODO *)
-  let create _program _kernel_name = ()
+  let create _program _kernel_name = from_voidp T._cl_kernel null
   let create_in_program _program = []
 
   type 'k arg =
@@ -384,8 +390,8 @@ module Kernel = struct
   (* TODO *)
   let function_name _kernel = ""
   let num_args _kernel = 0
-  let context _kernel = ()
-  let program _kernel = ()
+  let context _kernel = from_voidp T._cl_context null
+  let program _kernel = from_voidp T._cl_program null
 
   let work_group_size _kernel _device = 0
   let compile_work_group_size _kernel _device = 0, 0, 0
@@ -408,7 +414,7 @@ module Event = struct
   let wait _wait_list = ()
 
   (* TODO *)
-  let command_queue _event = ()
+  let command_queue _event = from_voidp T._cl_command_queue null
   let command_type _event = `Marker
   let command_execution_status _event = `Complete
 
