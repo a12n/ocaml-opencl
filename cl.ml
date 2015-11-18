@@ -163,6 +163,12 @@ module Info = struct
     match CArray.length chars - 1 with
     | length when length > 0 -> string_from_ptr ~length (CArray.start chars)
     | _other -> ""
+
+  let structure info_function typ =
+    let param_value = make typ in
+    info_function (Unsigned.Size_t.of_int (sizeof typ))
+      (to_voidp (addr param_value)) (from_voidp size_t null) |> check_error;
+    param_value
 end
 
 module Platform = struct
