@@ -1035,6 +1035,13 @@ module Kernel = struct
   (* TODO *)
   let num_args _kernel = 0
 
+  let context kernel =
+    Info.value (C.clGetKernelInfo kernel T._CL_KERNEL_CONTEXT) T.cl_context
+
+  let program kernel =
+    Info.value (C.clGetKernelInfo kernel T._CL_KERNEL_PROGRAM) T.cl_program
+
+  (* TODO *)
   let work_group_size _kernel _device = 0
   let compile_work_group_size _kernel _device = 0, 0, 0
   let local_mem_size _kernel _device = 0L
