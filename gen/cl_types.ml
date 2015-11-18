@@ -51,15 +51,27 @@ module Make (T : Cstubs.Types.TYPE) = struct
   let _cl_sampler : _cl_sampler Ctypes_static.structure T.typ =
     T.structure "_cl_sampler"
 
-  let cl_platform_id = T.ptr _cl_platform_id
-  let cl_device_id = T.ptr _cl_device_id
-  let cl_context = T.ptr _cl_context
-  let cl_command_queue = T.ptr _cl_command_queue
-  let cl_mem = T.ptr _cl_mem
-  let cl_program = T.ptr _cl_program
-  let cl_kernel = T.ptr _cl_kernel
-  let cl_event = T.ptr _cl_event
-  let cl_sampler = T.ptr _cl_sampler
+  type cl_platform_id =
+    _cl_platform_id Ctypes_static.structure Ctypes_static.ptr
+  type cl_device_id = _cl_device_id Ctypes_static.structure Ctypes_static.ptr
+  type cl_context = _cl_context Ctypes_static.structure Ctypes_static.ptr
+  type cl_command_queue =
+    _cl_command_queue Ctypes_static.structure Ctypes_static.ptr
+  type cl_mem = _cl_mem Ctypes_static.structure Ctypes_static.ptr
+  type cl_program = _cl_program Ctypes_static.structure Ctypes_static.ptr
+  type cl_kernel = _cl_kernel Ctypes_static.structure Ctypes_static.ptr
+  type cl_event = _cl_event Ctypes_static.structure Ctypes_static.ptr
+  type cl_sampler = _cl_sampler Ctypes_static.structure Ctypes_static.ptr
+
+  let cl_platform_id : cl_platform_id T.typ = T.ptr _cl_platform_id
+  let cl_device_id : cl_device_id T.typ = T.ptr _cl_device_id
+  let cl_context : cl_context T.typ = T.ptr _cl_context
+  let cl_command_queue : cl_command_queue T.typ = T.ptr _cl_command_queue
+  let cl_mem : cl_mem T.typ = T.ptr _cl_mem
+  let cl_program : cl_program T.typ = T.ptr _cl_program
+  let cl_kernel : cl_kernel T.typ = T.ptr _cl_kernel
+  let cl_event : cl_event T.typ = T.ptr _cl_event
+  let cl_sampler : cl_sampler T.typ = T.ptr _cl_sampler
 
   (* Typedefs *)
   let cl_bool = T.typedef cl_uint "cl_bool"
