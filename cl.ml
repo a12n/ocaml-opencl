@@ -268,8 +268,25 @@ module Context = struct
   type property =
     [ `Platform of platform ]
 
-  (* TODO *)
-  let create ?notify _properties _devices = from_voidp T._cl_context null
+  let cl_context_properties_of_property = function `Platform platform ->
+    [ Unsigned.UInt32.to_int T._CL_CONTEXT_PLATFORM |> Nativeint.of_int;
+      raw_address_of_ptr (to_voidp platform) ]
+
+  let cl_context_properties_of_property_list list =
+    List.fold_right (@)
+      (List.map cl_context_properties_of_property list) [Nativeint.zero]
+
+  (* TODO: notify closure *)
+  let create ?notify properties devices =
+    let properties = CArray.of_list T.cl_context_properties
+        (cl_context_properties_of_property_list properties) in
+    let devices = CArray.of_list T.cl_device_id devices in
+    let err = allocate T.cl_int T._CL_SUCCESS in
+    let context = C.clCreateContext (CArray.start properties)
+        (Unsigned.UInt32.of_int (CArray.length devices))
+        (CArray.start devices) None null err in
+    check_error (!@ err);
+    context
 
   (* TODO *)
   let create_from_type ?notify _properties _device_types =
