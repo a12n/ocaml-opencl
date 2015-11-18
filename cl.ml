@@ -490,8 +490,28 @@ module Mem = struct
     | `Image2d -> T._CL_MEM_OBJECT_IMAGE2D
     | `Image3d -> T._CL_MEM_OBJECT_IMAGE3D
 
-  (* TODO *)
-  let create_buffer _context _flags _host_data = from_voidp T._cl_mem null
+  let create_buffer context flags host_data =
+    let flags = of_flag_list flags in
+    let ba_opt, host_ptr, size =
+      match host_data with
+      | `Use ba ->
+        ( let array = array_of_bigarray genarray ba in
+          let size =
+            CArray.length array * (sizeof (CArray.element_type array)) in
+          let host_ptr = CArray.start array in
+          Some ba, to_voidp host_ptr, size )
+      | `Alloc (kind, dims) ->
+        ( let num_elts = Array.fold_left ( * ) 1 dims in
+          let elt_typ = typ_of_bigarray_kind kind in
+          let size = num_elts * (sizeof elt_typ) in
+          None, null, size ) in
+    let err = allocate T.cl_int T._CL_SUCCESS in
+    let mem = C.clCreateBuffer context flags
+        (Unsigned.Size_t.of_int size) host_ptr err in
+    check_error (!@ err);
+    if Unsigned.UInt64.(logand flags T._CL_MEM_USE_HOST_PTR <> zero) then
+      Gc_ext.link_opt mem ba_opt;
+    mem
 
   (* TODO *)
   let context _mem = from_voidp T._cl_context null
