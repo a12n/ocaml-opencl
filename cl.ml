@@ -214,10 +214,18 @@ module Command_queue = struct
       (CArray.start wait_list) event |> check_error;
     !@ event
 
-  (* TODO *)
-  let marker _queue = from_voidp T._cl_event null
-  let wait_for_events _queue _wait_list = ()
-  let barrier _queue = ()
+  let marker queue =
+    let event = allocate T.cl_event (from_voidp T._cl_event null) in
+    C.clEnqueueMarker queue event |> check_error;
+    !@ event
+
+  let wait_for_events queue wait_list =
+    let wait_list = CArray.of_list T.cl_event wait_list in
+    C.clEnqueueWaitForEvents queue
+      (Unsigned.UInt32.of_int (CArray.length wait_list))
+      (CArray.start wait_list) |> check_error
+
+  let barrier queue = C.clEnqueueBarrier queue |> check_error
 
   (* TODO *)
   let finish _queue = ()
