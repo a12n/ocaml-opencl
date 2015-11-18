@@ -168,9 +168,16 @@ module Command_queue = struct
   let write_buffer ?(wait_list=[]) ?(blocking=true) ?(offset=0) ?size
       _queue _mem _ba = from_voidp T._cl_event null
 
-  (* TODO *)
-  let copy_buffer ?(wait_list=[]) _queue ~src_buffer ~dst_buffer
-      ~src_offset ~dst_offset ~size = from_voidp T._cl_event null
+  let copy_buffer ?(wait_list=[]) queue ~src_buffer ~dst_buffer
+      ~src_offset ~dst_offset ~size =
+    let wait_list = CArray.of_list T.cl_event wait_list in
+    let event = allocate T.cl_event (from_voidp T._cl_event null) in
+    C.clEnqueueCopyBuffer queue src_buffer dst_buffer
+      (Unsigned.Size_t.of_int src_offset) (Unsigned.Size_t.of_int dst_offset)
+      (Unsigned.Size_t.of_int size)
+      (Unsigned.UInt32.of_int (CArray.length wait_list))
+      (CArray.start wait_list) event |> check_error;
+    !@ event
 
   (* TODO *)
   let read_image ?(wait_list=[]) ?(blocking=true) ?(row_pitch=0)
