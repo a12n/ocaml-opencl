@@ -221,10 +221,25 @@ module Command_queue = struct
   let copy_buffer_to_image ?(wait_list=[]) _queue ~src_buffer
       ~dst_image ~src_offset ~dst_origin ~region = from_voidp T._cl_event null
 
-  (* TODO *)
   let nd_range_kernel ?(wait_list=[]) ?global_work_offset
-      ?local_work_size _queue _kernel ~global_work_size =
-    from_voidp T._cl_event null
+      ?local_work_size queue kernel ~global_work_size =
+    let work_dim = Array.length global_work_size in
+    let global_work_offset = from_voidp size_t null in
+    let global_work_size = CArray_ext.of_array size_t
+        (Array.map Unsigned.Size_t.of_int global_work_size) |> CArray.start in
+    let local_work_size = match local_work_size with
+      | Some a ->
+        ( assert (Array.length a = work_dim);
+          CArray_ext.of_array size_t
+            (Array.map Unsigned.Size_t.of_int a) |> CArray.start )
+      | None -> from_voidp size_t null in
+    let wait_list = CArray.of_list T.cl_event wait_list in
+    let event = allocate T.cl_event (from_voidp T._cl_event null) in
+    C.clEnqueueNDRangeKernel queue kernel (Unsigned.UInt32.of_int work_dim)
+      global_work_offset global_work_size local_work_size
+      (Unsigned.UInt32.of_int (CArray.length wait_list))
+      (CArray.start wait_list) event |> check_error;
+    !@ event
 
   let task ?(wait_list=[]) queue kernel =
     let wait_list = CArray.of_list T.cl_event wait_list in
