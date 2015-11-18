@@ -649,5 +649,4 @@ module Event = struct
   let command_end _event = 0L
 end
 
-(* TODO *)
-let unload_compiler () = ()
+let unload_compiler () = C.clUnloadCompiler () |> check_error
