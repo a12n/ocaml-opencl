@@ -507,7 +507,11 @@ module Device = struct
   let global_mem_cache_type _device = None
   let local_mem_type _device = None
   let max_work_item_sizes _device = [||]
-  let platform _device = (from_voidp T._cl_platform_id null)
+
+  let platform device =
+    Info.value (C.clGetDeviceInfo device T._CL_DEVICE_PLATFORM) T.cl_platform_id
+
+  (* TODO *)
   let queue_properties _device = []
 end
 
