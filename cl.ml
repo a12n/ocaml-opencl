@@ -486,8 +486,16 @@ module Sampler = struct
 end
 
 module Program = struct
-  (* TODO *)
-  let create_with_source _context _strings = from_voidp T._cl_program null
+  let create_with_source context strings =
+    let lengths = CArray.of_list size_t
+        (List.map Unsigned.Size_t.of_int (List.map String.length strings)) in
+    let strings = CArray.of_list string strings in
+    let err = allocate T.cl_int T._CL_SUCCESS in
+    let program = C.clCreateProgramWithSource context
+        (Unsigned.UInt32.of_int (CArray.length strings)) (CArray.start strings)
+        (CArray.start lengths) err in
+    check_error (!@ err);
+    program
 
   (* TODO *)
   let create_with_binary _context _device_binaries =
