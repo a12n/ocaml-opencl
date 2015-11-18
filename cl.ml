@@ -193,9 +193,24 @@ module Command_queue = struct
   (* TODO *)
   let set_properties _queue _properties = []
 
-  (* TODO *)
+  (* XXX: Read/write operations for bigarrays are always blocking.
+     There seems to be no way to guarantee that bigarray will be
+     reachable for the duration of the operation. *)
+
   let read_buffer ?(wait_list=[]) ?(blocking=true) ?(offset=0) ?size
-      _queue _mem _ba = from_voidp T._cl_event null
+      queue mem ba =
+    let blocking = T._CL_TRUE in
+    let array = array_of_bigarray genarray ba in
+    let size = match size with
+      | Some n -> n
+      | None -> CArray.length array * (sizeof (CArray.element_type array)) in
+    let wait_list = CArray.of_list T.cl_event wait_list in
+    let event = allocate T.cl_event (from_voidp T._cl_event null) in
+    C.clEnqueueReadBuffer queue mem blocking (Unsigned.Size_t.of_int offset)
+      (Unsigned.Size_t.of_int size) (to_voidp (CArray.start array))
+      (Unsigned.UInt32.of_int (CArray.length wait_list))
+      (CArray.start wait_list) event |> check_error;
+    !@ event
 
   (* TODO *)
   let write_buffer ?(wait_list=[]) ?(blocking=true) ?(offset=0) ?size
