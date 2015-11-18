@@ -643,9 +643,21 @@ module Mem = struct
     | c when c = T._CL_BGRA -> `Bgra (to_argb_channel_type data_type)
     | _other -> failwith "Cl.Mem.to_image_format"
 
-  (* TODO *)
-  let create_image2d ?(row_pitch=0) _context _flags _format
-      ~width ~height _ba_opt = from_voidp T._cl_mem null
+  let create_image2d ?(row_pitch=0) context flags format ~width ~height ba_opt =
+    let flags = of_flag_list flags in
+    let image_format = of_image_format format in
+    let host_ptr, row_pitch =
+      match ba_opt with
+      | Some ba -> to_voidp (bigarray_start genarray ba), row_pitch
+      | None -> null, 0 in
+    let err = allocate T.cl_int T._CL_SUCCESS in
+    let mem = C.clCreateImage2D context flags (addr image_format)
+        (Unsigned.Size_t.of_int width) (Unsigned.Size_t.of_int height)
+        (Unsigned.Size_t.of_int row_pitch) host_ptr err in
+    check_error (!@ err);
+    if Unsigned.UInt64.(logand flags T._CL_MEM_USE_HOST_PTR <> zero) then
+      Gc_ext.link_opt mem ba_opt;
+    mem
 
   (* TODO *)
   let create_image3d ?(row_pitch=0) ?(slice_pitch=0) _context _flags _format
