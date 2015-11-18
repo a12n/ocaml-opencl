@@ -160,6 +160,8 @@ module Info = struct
 
   let array info_function typ = carray info_function typ |> CArray_ext.to_array
 
+  let list info_function typ = carray info_function typ |> CArray.to_list
+
   let string info_function =
     let chars = carray info_function char in
     match CArray.length chars - 1 with
