@@ -206,8 +206,13 @@ module Command_queue = struct
       ?local_work_size _queue _kernel ~global_work_size =
     from_voidp T._cl_event null
 
-  (* TODO *)
-  let task ?(wait_list=[]) _queue _kernel = from_voidp T._cl_event null
+  let task ?(wait_list=[]) queue kernel =
+    let wait_list = CArray.of_list T.cl_event wait_list in
+    let event = allocate T.cl_event (from_voidp T._cl_event null) in
+    C.clEnqueueTask queue kernel
+      (Unsigned.UInt32.of_int (CArray.length wait_list))
+      (CArray.start wait_list) event |> check_error;
+    !@ event
 
   (* TODO *)
   let marker _queue = from_voidp T._cl_event null
