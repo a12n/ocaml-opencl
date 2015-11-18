@@ -174,12 +174,20 @@ module Platform = struct
       (from_voidp T.cl_uint null) |> check_error;
     CArray.to_list platforms
 
-  (* TODO *)
-  let extensions _platform = ""
-  let name _platform = ""
-  let profile _platform = ""
-  let vendor _platform = ""
-  let version _platform = ""
+  let extensions platform =
+    Info.string (C.clGetPlatformInfo platform T._CL_PLATFORM_EXTENSIONS)
+
+  let name platform =
+    Info.string (C.clGetPlatformInfo platform T._CL_PLATFORM_NAME)
+
+  let profile platform =
+    Info.string (C.clGetPlatformInfo platform T._CL_PLATFORM_PROFILE)
+
+  let vendor platform =
+    Info.string (C.clGetPlatformInfo platform T._CL_PLATFORM_VENDOR)
+
+  let version platform =
+    Info.string (C.clGetPlatformInfo platform T._CL_PLATFORM_VERSION)
 end
 
 module Command_queue = struct
