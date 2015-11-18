@@ -1,3 +1,8 @@
+open Ctypes
+
+module C = Cl_bindings.Make (Cl_generated)
+module T = Cl_types.Make (Cl_types_detected)
+
 type buffer
 type image
 
