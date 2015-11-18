@@ -8,15 +8,29 @@ OCAMLBUILD =	\
 	OCAML_LIB_DIR=$(OCAML_LIB_DIR)	\
 		ocamlbuild -use-ocamlfind
 
-.PHONY: all clean lib utop
+.PHONY: all clean install lib uninstall utop
 
 all: lib
 
 clean:
 	$(OCAMLBUILD) -clean
 
+install: lib
+	ocamlfind install cl	\
+		META	\
+		_build/cl$(EXT_LIB)	\
+		_build/cl.cma	\
+		_build/cl.cmi	\
+		_build/cl.cmxa	\
+		_build/cl.mli	\
+		_build/dllcl_stubs$(EXT_DLL)	\
+		_build/libcl_stubs$(EXT_LIB)
+
 lib:
 	$(OCAMLBUILD) cl.cma cl.cmxa
+
+uninstall:
+	ocamlfind remove cl
 
 utop: lib
 	utop	\
