@@ -392,7 +392,7 @@ module Kernel : sig
       `Int of int | `Uint of int |
       `Long of int64 | `Ulong of int64 |
       `Float of float | `Double of float | `Half of int |
-      `Mem of 'k mem |
+      `Mem of 'k mem | `Null_mem |
       `Sampler of sampler ]
 
   type local_arg =
@@ -404,7 +404,7 @@ module Kernel : sig
       `Local_double |
       `Local_half ]
 
-  val set_arg : kernel -> int -> [ 'k arg | local_arg ] option -> unit
+  val set_arg : kernel -> int -> [ 'k arg | local_arg ] -> unit
 
   (* Kernel info. *)
 
