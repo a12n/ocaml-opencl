@@ -345,7 +345,7 @@ end
 module Kernel = struct
   (* TODO *)
   let create _program _kernel_name = ()
-  let create_in_program _program = []
+  let create_all _program = []
 
   type 'k arg =
     [ `Char of char | `Uchar of int |

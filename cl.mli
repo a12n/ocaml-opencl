@@ -382,7 +382,7 @@ module Kernel : sig
 
   val create : program -> string -> kernel
 
-  val create_in_program : program -> kernel list
+  val create_all : program -> kernel list
 
   (* Setting kernel arguments *)
 
