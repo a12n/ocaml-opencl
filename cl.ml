@@ -321,6 +321,11 @@ module Mem = struct
   type mem_type =
     [ `Buffer | `Image2d | `Image3d ]
 
+  let cl_mem_object_type_of_mem_type = function
+    | `Buffer -> T._CL_MEM_OBJECT_BUFFER
+    | `Image2d -> T._CL_MEM_OBJECT_IMAGE2D
+    | `Image3d -> T._CL_MEM_OBJECT_IMAGE3D
+
   (* TODO *)
   let create_buffer _context _flags _host_data = from_voidp T._cl_mem null
 
