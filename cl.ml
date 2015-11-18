@@ -244,27 +244,6 @@ module Context = struct
 end
 
 module Mem = struct
-  type channel_order =
-    [ `R | `A |
-      `Intensity | `Luminance | (* Float, Half_float, Snorm_int16,
-                                   Snorm_int8, Unorm_int16, Unorm_int8 *)
-      `Rg | `Ra |
-      `Rgb |  (* Unorm_int_101010, Unorm_short_555, Unorm_short_565 *)
-      `Rgba |
-      `Argb | `Bgra ]          (* Signed_int8, Snorm_int8, Unorm_int8,
-                                  Unsigned_int8 *)
-
-  type channel_type =
-    [ `Snorm_int8 | `Snorm_int16 |
-      `Unorm_int8 | `Unorm_int16 |
-      `Unorm_short_565 | `Unorm_short_555 | `Unorm_int_101010 |
-      `Signed_int8 | `Signed_int16 | `Signed_int32 |
-      `Unsigned_int8 | `Unsigned_int16 | `Unsigned_int32 |
-      `Half_float | `Float ]
-
-  (* TODO: Compile time image format validation. *)
-  type image_format = channel_order * channel_type
-
   type flag =
     [ `Read_write | `Write_only | `Read_only |
       `Use_host_ptr | `Alloc_host_ptr | `Copy_host_ptr ]
@@ -282,6 +261,35 @@ module Mem = struct
   let mem_type _mem = `Buffer
   let size _mem = 0
 
+  type intensity_channel_type =
+    [ `Unorm_int8 | `Unorm_int16 |
+      `Snorm_int8 | `Snorm_int16 |
+      `Half_float | `Float ]
+
+  type rgb_channel_type =
+    [ `Unorm_short_565 | `Unorm_short_555 | `Unorm_int_101010 ]
+
+  type argb_channel_type =
+    [ `Unorm_int8 | `Snorm_int8 |
+      `Signed_int8 | `Unsigned_int8 ]
+
+  type channel_type =
+    [ intensity_channel_type | rgb_channel_type | argb_channel_type |
+      `Signed_int16 | `Signed_int32 |
+      `Unsigned_int16 | `Unsigned_int32 ]
+
+  type image_format =
+    [ `R of channel_type |
+      `A of channel_type |
+      `Intensity of intensity_channel_type |
+      `Luminance of intensity_channel_type |
+      `Rg of channel_type |
+      `Ra of channel_type |
+      `Rgb of rgb_channel_type |
+      `Rgba of channel_type |
+      `Argb of argb_channel_type |
+      `Bgra of argb_channel_type ]
+
   (* TODO *)
   let create_image2d ?(row_pitch=0) _context _flags _format
       ~width ~height _ba_opt = ()
@@ -294,7 +302,7 @@ module Mem = struct
   let supported_image_formats _context _flags _mem_type = []
 
   (* TODO *)
-  let image_format _mem = (`Intensity, `Float)
+  let image_format _mem = `Intensity `Float
   let image_element_size _mem = 0
   let image_row_pitch _mem = 0
   let image_slice_pitch _mem = 0

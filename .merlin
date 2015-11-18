@@ -1,0 +1,5 @@
+B _build/**
+PKG ctypes
+PKG ctypes.foreign
+PKG ctypes.stubs
+S gen
