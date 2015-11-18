@@ -169,8 +169,21 @@ module Command_queue = struct
     [ `Out_of_order_exec_mode of bool |
       `Profiling of bool ]
 
-  (* TODO *)
-  let create _context _device _properties = from_voidp T._cl_command_queue null
+  let of_property = function
+    | `Out_of_order_exec_mode true -> T._CL_QUEUE_OUT_OF_ORDER_EXEC_MODE_ENABLE
+    | `Profiling true -> T._CL_QUEUE_PROFILING_ENABLE
+    | _other -> Unsigned.UInt64.zero
+
+  let of_property_list properties =
+    List.fold_left Unsigned.UInt64.add Unsigned.UInt64.zero
+      (List.map of_property properties)
+
+  let create context device properties =
+    let properties = of_property_list properties in
+    let err = allocate T.cl_int T._CL_SUCCESS in
+    let queue = C.clCreateCommandQueue context device properties err in
+    check_error (!@ err);
+    queue
 
   (* TODO *)
   let context _queue = from_voidp T._cl_context null
