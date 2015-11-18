@@ -505,6 +505,14 @@ module Mem = struct
       `Snorm_int8 | `Snorm_int16 |
       `Half_float | `Float ]
 
+  let of_intensity_channel_type = function
+    | `Unorm_int8 -> T._CL_UNORM_INT8
+    | `Unorm_int16 -> T._CL_UNORM_INT16
+    | `Snorm_int8 -> T._CL_SNORM_INT8
+    | `Snorm_int16 -> T._CL_SNORM_INT16
+    | `Half_float -> T._CL_HALF_FLOAT
+    | `Float -> T._CL_FLOAT
+
   let to_intensity_channel_type = function
     | c when c = T._CL_UNORM_INT8 -> `Unorm_int8
     | c when c = T._CL_UNORM_INT16 -> `Unorm_int16
@@ -517,6 +525,11 @@ module Mem = struct
   type rgb_channel_type =
     [ `Unorm_short_565 | `Unorm_short_555 | `Unorm_int_101010 ]
 
+  let of_rgb_channel_type = function
+    | `Unorm_short_565 -> T._CL_UNORM_SHORT_565
+    | `Unorm_short_555 -> T._CL_UNORM_SHORT_555
+    | `Unorm_int_101010 -> T._CL_UNORM_INT_101010
+
   let to_rgb_channel_type = function
     | c when c = T._CL_UNORM_SHORT_565 -> `Unorm_short_565
     | c when c = T._CL_UNORM_SHORT_555 -> `Unorm_short_555
@@ -526,6 +539,12 @@ module Mem = struct
   type argb_channel_type =
     [ `Unorm_int8 | `Snorm_int8 |
       `Signed_int8 | `Unsigned_int8 ]
+
+  let of_argb_channel_type = function
+    | `Unorm_int8 -> T._CL_UNORM_INT8
+    | `Snorm_int8 -> T._CL_SNORM_INT8
+    | `Signed_int8 -> T._CL_SIGNED_INT8
+    | `Unsigned_int8 -> T._CL_UNSIGNED_INT8
 
   let to_argb_channel_type = function
     | c when c = T._CL_UNORM_INT8 -> `Unorm_int8
@@ -538,6 +557,28 @@ module Mem = struct
     [ intensity_channel_type | rgb_channel_type | argb_channel_type |
       `Signed_int16 | `Signed_int32 |
       `Unsigned_int16 | `Unsigned_int32 ]
+
+  (* XXX: Duplicates of_*_channel type functions. *)
+  let of_channel_type = function
+    (* channel_type *)
+    | `Signed_int16 -> T._CL_SIGNED_INT16
+    | `Signed_int32 -> T._CL_SIGNED_INT32
+    | `Unsigned_int16 -> T._CL_UNSIGNED_INT16
+    | `Unsigned_int32 -> T._CL_UNSIGNED_INT32
+    (* intensity_channel_type *)
+    | `Unorm_int8 -> T._CL_UNORM_INT8
+    | `Unorm_int16 -> T._CL_UNORM_INT16
+    | `Snorm_int8 -> T._CL_SNORM_INT8
+    | `Snorm_int16 -> T._CL_SNORM_INT16
+    | `Half_float -> T._CL_HALF_FLOAT
+    | `Float -> T._CL_FLOAT
+    (* rgb_channel_type *)
+    | `Unorm_short_565 -> T._CL_UNORM_SHORT_565
+    | `Unorm_short_555 -> T._CL_UNORM_SHORT_555
+    | `Unorm_int_101010 -> T._CL_UNORM_INT_101010
+    (* argb_channel_type - intensity_channel_type *)
+    | `Signed_int8 -> T._CL_SIGNED_INT8
+    | `Unsigned_int8 -> T._CL_UNSIGNED_INT8
 
   let to_channel_type = function
     | c when c = T._CL_SIGNED_INT16 -> `Signed_int16
@@ -563,6 +604,26 @@ module Mem = struct
       `Rgba of channel_type |
       `Argb of argb_channel_type |
       `Bgra of argb_channel_type ]
+
+  let of_image_format (format : image_format) =
+    let order, data_type =
+      match format with
+      | `R data_type -> T._CL_R, of_channel_type data_type
+      | `A data_type -> T._CL_A, of_channel_type data_type
+      | `Intensity data_type ->
+        T._CL_INTENSITY, of_intensity_channel_type data_type
+      | `Luminance data_type ->
+        T._CL_LUMINANCE, of_intensity_channel_type data_type
+      | `Rg data_type -> T._CL_RG, of_channel_type data_type
+      | `Ra data_type -> T._CL_RA, of_channel_type data_type
+      | `Rgb data_type -> T._CL_RGB, of_rgb_channel_type data_type
+      | `Rgba data_type -> T._CL_RGBA, of_channel_type data_type
+      | `Argb data_type -> T._CL_ARGB, of_argb_channel_type data_type
+      | `Bgra data_type -> T._CL_BGRA, of_argb_channel_type data_type in
+    let ans = make T.cl_image_format in
+    setf ans T.image_channel_order order;
+    setf ans T.image_channel_data_type data_type;
+    ans
 
   let to_image_format format =
     let order = getf format T.image_channel_order in
