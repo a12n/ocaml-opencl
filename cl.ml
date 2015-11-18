@@ -497,9 +497,27 @@ module Program = struct
     check_error (!@ err);
     program
 
-  (* TODO *)
-  let create_with_binary _context _device_binaries =
-    from_voidp T._cl_program null, []
+  let to_binary_status = function
+    | c when c = T._CL_SUCCESS -> None
+    | c when c = T._CL_INVALID_VALUE -> Some `Invalid_value
+    | c when c = T._CL_INVALID_BINARY -> Some `Invalid_binary
+    | _other -> failwith "Cl.Program.to_binary_status"
+
+  let create_with_binary context device_binaries =
+    let devices, binaries = List.split device_binaries in
+    let devices = CArray.of_list T.cl_device_id devices in
+    let lengths = CArray.of_list size_t
+        (List.map Unsigned.Size_t.of_int (List.map Bytes.length binaries)) in
+    let binaries = CArray.of_list ocaml_bytes
+        (List.map ocaml_bytes_start binaries) in
+    let binary_status = CArray.make T.cl_int (CArray.length devices) in
+    let err = allocate T.cl_int T._CL_SUCCESS in
+    let program = C.clCreateProgramWithBinary context
+        (Unsigned.UInt32.of_int (CArray.length devices)) (CArray.start devices)
+        (CArray.start lengths) (CArray.start binaries)
+        (CArray.start binary_status) err in
+    check_error (!@ err);
+    program, List.map to_binary_status (CArray.to_list binary_status)
 
   (* TODO *)
   let build ?notify _program _devices _options = ()
