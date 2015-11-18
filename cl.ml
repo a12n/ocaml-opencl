@@ -145,6 +145,8 @@ let check_error err =
 let of_bool = function false -> T._CL_FALSE
                      | true -> T._CL_TRUE
 
+let to_bool = ((<>) T._CL_FALSE)
+
 (* Get various info attributes of OpenCL objects. *)
 module Info = struct
   let carray info_function typ =
