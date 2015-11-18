@@ -164,11 +164,12 @@ module Info = struct
     | length when length > 0 -> string_from_ptr ~length (CArray.start chars)
     | _other -> ""
 
-  let structure info_function typ =
-    let param_value = make typ in
+  let value info_function typ =
+    let param_value = CArray.make typ 1 in
     info_function (Unsigned.Size_t.of_int (sizeof typ))
-      (to_voidp (addr param_value)) (from_voidp size_t null) |> check_error;
-    param_value
+      (to_voidp (CArray.start param_value))
+      (from_voidp size_t null) |> check_error;
+    CArray.get param_value 0
 end
 
 module Platform = struct
@@ -784,7 +785,7 @@ module Mem = struct
     CArray.to_list image_formats |> List.map to_image_format
 
   let image_format mem =
-    Info.structure (C.clGetImageInfo mem T._CL_IMAGE_FORMAT)
+    Info.value (C.clGetImageInfo mem T._CL_IMAGE_FORMAT)
       T.cl_image_format |> to_image_format
 
   (* TODO *)
