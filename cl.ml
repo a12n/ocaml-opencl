@@ -66,15 +66,20 @@ type error =
 
 exception Exn of error
 
+let check_error err =
+  if err <> T._CL_SUCCESS then
+    (* TODO: raise Exn *)
+    ()
+
 module Platform = struct
   let get () =
     let num_platforms = allocate T.cl_uint Unsigned.UInt32.zero in
     C.clGetPlatformIDs Unsigned.UInt32.zero (from_voidp T.cl_platform_id null)
-      num_platforms |> ignore;
+      num_platforms |> check_error;
     let platforms = CArray.make T.cl_platform_id
         (Unsigned.UInt32.to_int (!@ num_platforms)) in
     C.clGetPlatformIDs (!@ num_platforms) (CArray.start platforms)
-      (from_voidp T.cl_uint null) |> ignore;
+      (from_voidp T.cl_uint null) |> check_error;
     CArray.to_list platforms
 
   (* TODO *)
