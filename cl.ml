@@ -13,6 +13,16 @@ module CArray_ext = struct
     Array.init (CArray.length carray) (CArray.get carray)
 end
 
+(* GC and object lifetime related functions. *)
+module Gc_ext = struct
+  (* Make heap allocated [b] value valid for the lifetime of heap
+     allocated [a]. *)
+  let link a b = Gc.finalise (fun _a -> ignore b) a
+
+  (* Links [b] to [a], but only if there is some [b]. *)
+  let link_opt a = function Some b -> link a b | None -> ()
+end
+
 type buffer
 type image
 
