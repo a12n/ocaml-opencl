@@ -71,6 +71,9 @@ let check_error err =
     (* TODO: raise Exn *)
     ()
 
+let of_bool = function false -> T._CL_FALSE
+                     | true -> T._CL_TRUE
+
 module Platform = struct
   let get () =
     let num_platforms = allocate T.cl_uint Unsigned.UInt32.zero in
