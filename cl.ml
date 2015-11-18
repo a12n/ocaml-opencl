@@ -227,9 +227,8 @@ module Command_queue = struct
 
   let barrier queue = C.clEnqueueBarrier queue |> check_error
 
-  (* TODO *)
-  let finish _queue = ()
-  let flush _queue = ()
+  let finish queue = C.clFinish queue |> check_error
+  let flush queue = C.clFlush queue |> check_error
 end
 
 module Device = struct
