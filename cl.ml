@@ -10,7 +10,7 @@ module CArray_ext = struct
     ans
 
   let to_array carray =
-    Array.init (CArray.length carray) (fun i -> CArray.get carray i)
+    Array.init (CArray.length carray) (CArray.get carray)
 end
 
 type buffer
