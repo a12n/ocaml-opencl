@@ -64,12 +64,14 @@ type error =
   | Invalid_mip_level
   | Invalid_global_work_size
 
+(* TODO *)
+let to_error = function _any -> Device_not_found
+
 exception Exn of error
 
 let check_error err =
   if err <> T._CL_SUCCESS then
-    (* TODO: raise Exn *)
-    ()
+    raise (Exn (to_error err))
 
 let of_bool = function false -> T._CL_FALSE
                      | true -> T._CL_TRUE
