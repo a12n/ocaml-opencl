@@ -579,20 +579,26 @@ module Device = struct
   let image_support device =
     Info.cl_bool (C.clGetDeviceInfo device T._CL_DEVICE_IMAGE_SUPPORT)
 
-  (* TODO *)
-  let single_fp_config _device =
-    { denorm = false;
-      inf_nan = false;
-      round_to_nearest = false;
-      round_to_zero = false;
-      round_to_inf = false;
-      fma = false }
+  let single_fp_config device =
+    let bits =
+      Info.value (C.clGetDeviceInfo device T._CL_DEVICE_SINGLE_FP_CONFIG)
+        T.cl_device_fp_config in
+    { denorm = Bitfield.has bits T._CL_FP_DENORM;
+      inf_nan = Bitfield.has bits T._CL_FP_INF_NAN;
+      round_to_nearest = Bitfield.has bits T._CL_FP_ROUND_TO_NEAREST;
+      round_to_zero = Bitfield.has bits T._CL_FP_ROUND_TO_ZERO;
+      round_to_inf = Bitfield.has bits T._CL_FP_ROUND_TO_INF;
+      fma = Bitfield.has bits T._CL_FP_FMA }
 
   (* TODO *)
   let device_type _device = []
-  let execution_capabilities _device =
-    { kernel = false;
-      native_kernel = false }
+
+  let execution_capabilities device =
+    let bits =
+      Info.value (C.clGetDeviceInfo device T._CL_DEVICE_EXECUTION_CAPABILITIES)
+        T.cl_device_exec_capabilities in
+    { kernel = Bitfield.has bits T._CL_EXEC_KERNEL;
+      native_kernel = Bitfield.has bits T._CL_EXEC_NATIVE_KERNEL }
 
   let global_mem_cache_type device =
     Info.value (C.clGetDeviceInfo device T._CL_DEVICE_GLOBAL_MEM_CACHE_TYPE)
