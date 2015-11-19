@@ -15,6 +15,9 @@ module CArray_ext = struct
 
   let to_array carray =
     Array.init (CArray.length carray) (CArray.get carray)
+
+  let to_bytes carray = Bytes.of_string
+      (string_from_ptr (CArray.start carray) (CArray.length carray))
 end
 
 (* GC and object lifetime related functions. *)
