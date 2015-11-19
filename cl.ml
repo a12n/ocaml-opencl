@@ -750,8 +750,9 @@ module Mem = struct
   let context mem =
     Info.value (C.clGetMemObjectInfo mem T._CL_MEM_CONTEXT) T.cl_context
 
-  (* TODO *)
-  let flags _mem = []
+  let flags mem =
+    Info.value (C.clGetMemObjectInfo mem T._CL_MEM_FLAGS)
+      T.cl_mem_flags |> to_flag_list
 
   let map_count mem =
     Info.cl_uint (C.clGetMemObjectInfo mem T._CL_MEM_MAP_COUNT)
