@@ -176,6 +176,10 @@ module Info = struct
     CArray.get param_value 0
 
   let bool info_function = value info_function T.cl_bool |> to_bool
+
+  (* cl_ulong -> int64 *)
+  let int64 info_function =
+    value info_function T.cl_ulong |> Unsigned.UInt64.to_int64
 end
 
 module Platform = struct
