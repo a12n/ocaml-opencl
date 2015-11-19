@@ -633,7 +633,16 @@ module Mem = struct
   (* TODO *)
   let flags _mem = []
   let map_count _mem = 0
-  let mem_type _mem = `Buffer
+
+  let mem_type mem =
+    Info.value (C.clGetMemObjectInfo mem T._CL_MEM_TYPE)
+      T.cl_mem_object_type |> function
+    | c when c = T._CL_MEM_OBJECT_BUFFER -> `Buffer
+    | c when c = T._CL_MEM_OBJECT_IMAGE2D -> `Image2d
+    | c when c = T._CL_MEM_OBJECT_IMAGE3D -> `Image3d
+    | _other -> failwith "Cl.Mem.mem_type"
+
+  (* TODO *)
   let size _mem = 0
 
   type intensity_channel_type =
