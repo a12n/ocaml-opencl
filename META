@@ -1,4 +1,4 @@
-version = "0.1.81"
+version = "0.1.82"
 description = "Binding to OpenCL"
 requires = "bigarray bytes ctypes.stubs"
 archive(byte) = "cl.cma"
