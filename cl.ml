@@ -1081,10 +1081,16 @@ module Kernel = struct
   let program kernel =
     Info.value (C.clGetKernelInfo kernel T._CL_KERNEL_PROGRAM) T.cl_program
 
+  let work_group_size kernel device =
+    Info.size_t (C.clGetKernelWorkGroupInfo kernel device
+                   T._CL_KERNEL_WORK_GROUP_SIZE)
+
   (* TODO *)
-  let work_group_size _kernel _device = 0
   let compile_work_group_size _kernel _device = 0, 0, 0
-  let local_mem_size _kernel _device = 0L
+
+  let local_mem_size kernel device =
+    Info.cl_ulong (C.clGetKernelWorkGroupInfo kernel device
+                     T._CL_KERNEL_LOCAL_MEM_SIZE)
 end
 
 module Event = struct
