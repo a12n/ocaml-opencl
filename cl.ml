@@ -184,6 +184,9 @@ module Info = struct
 
   let cl_bool info_function = value info_function T.cl_bool |> to_bool
 
+  let cl_uint info_function =
+    value info_function T.cl_uint |> Unsigned.UInt32.to_int
+
   let cl_ulong info_function =
     value info_function T.cl_ulong |> Unsigned.UInt64.to_int64
 end
