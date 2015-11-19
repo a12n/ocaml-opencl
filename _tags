@@ -1,0 +1,11 @@
+"gen": include
+
+true: safe_string
+true: warn(+A-32-34-44-48)
+
+<*.{mli,ml}>: package(ctypes.stubs)
+
+<cl.{cma,cmxa}>: use_cl_stubs
+
+<libcl_stubs.*>: use_opencl
+<*.c>: use_ctypes, use_opencl
