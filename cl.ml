@@ -1072,8 +1072,8 @@ module Kernel = struct
   let function_name kernel =
     Info.string (C.clGetKernelInfo kernel T._CL_KERNEL_FUNCTION_NAME)
 
-  (* TODO *)
-  let num_args _kernel = 0
+  let num_args kernel =
+    Info.cl_uint (C.clGetKernelInfo kernel T._CL_KERNEL_NUM_ARGS)
 
   let context kernel =
     Info.value (C.clGetKernelInfo kernel T._CL_KERNEL_CONTEXT) T.cl_context
