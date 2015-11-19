@@ -9,6 +9,10 @@ module CArray_ext = struct
     Array.iteri (fun i v -> CArray.set ans i v) array;
     ans
 
+  (* Size of array in bytes *)
+  let size carray =
+    CArray.length carray * sizeof (CArray.element_type carray)
+
   let to_array carray =
     Array.init (CArray.length carray) (CArray.get carray)
 end
