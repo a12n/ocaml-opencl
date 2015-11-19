@@ -504,8 +504,23 @@ module Device = struct
   let execution_capabilities _device =
     { kernel = false;
       native_kernel = false }
-  let global_mem_cache_type _device = None
-  let local_mem_type _device = None
+
+  let global_mem_cache_type device =
+    Info.value (C.clGetDeviceInfo device T._CL_DEVICE_GLOBAL_MEM_CACHE_TYPE)
+      T.cl_device_mem_cache_type |> function
+    | c when c = T._CL_NONE -> None
+    | c when c = T._CL_READ_ONLY_CACHE -> Some `Read_only_cache
+    | c when c = T._CL_READ_WRITE_CACHE -> Some `Read_write_cache
+    | _other -> failwith "Cl.Device.global_mem_cache_type"
+
+  let local_mem_type device =
+    Info.value (C.clGetDeviceInfo device T._CL_DEVICE_LOCAL_MEM_TYPE)
+      T.cl_device_local_mem_type |> function
+    | c when c = T._CL_LOCAL -> Some `Local
+    | c when c = T._CL_GLOBAL -> Some `Global
+    | _other -> failwith "Cl.Device.local_mem_type"
+
+  (* TODO *)
   let max_work_item_sizes _device = [||]
 
   let platform device =
