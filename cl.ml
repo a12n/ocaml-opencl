@@ -242,6 +242,10 @@ module Command_queue = struct
     List.fold_left Unsigned.UInt64.add Unsigned.UInt64.zero
       (List.map of_property properties)
 
+  let to_property_list = Bitfield.to_flag_list
+      [ `Out_of_order_exec_mode true, T._CL_QUEUE_OUT_OF_ORDER_EXEC_MODE_ENABLE;
+        `Profiling true, T._CL_QUEUE_PROFILING_ENABLE ]
+
   let create context device properties =
     let properties = of_property_list properties in
     let err = allocate T.cl_int T._CL_SUCCESS in
@@ -255,8 +259,9 @@ module Command_queue = struct
   let device queue =
     Info.value (C.clGetCommandQueueInfo queue T._CL_QUEUE_DEVICE) T.cl_device_id
 
-  (* TODO *)
-  let properties _queue = []
+  let properties queue =
+    Info.value (C.clGetCommandQueueInfo queue T._CL_QUEUE_PROPERTIES)
+      T.cl_command_queue_properties |> to_property_list
 
   (* TODO *)
   let set_properties _queue _properties = []
@@ -633,8 +638,9 @@ module Device = struct
   let platform device =
     Info.value (C.clGetDeviceInfo device T._CL_DEVICE_PLATFORM) T.cl_platform_id
 
-  (* TODO *)
-  let queue_properties _device = []
+  let queue_properties device =
+    Info.value (C.clGetDeviceInfo device T._CL_DEVICE_QUEUE_PROPERTIES)
+      T.cl_command_queue_properties |> Command_queue.to_property_list
 end
 
 module Context = struct
