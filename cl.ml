@@ -646,7 +646,9 @@ module Mem = struct
 
   (* TODO *)
   let flags _mem = []
-  let map_count _mem = 0
+
+  let map_count mem =
+    Info.cl_uint (C.clGetMemObjectInfo mem T._CL_MEM_MAP_COUNT)
 
   let mem_type mem =
     Info.value (C.clGetMemObjectInfo mem T._CL_MEM_TYPE)
