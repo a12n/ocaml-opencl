@@ -1103,8 +1103,14 @@ module Program = struct
     Info.list (C.clGetProgramInfo program T._CL_PROGRAM_BINARY_SIZES)
       size_t |> List.map Unsigned.Size_t.to_int
 
-  (* TODO *)
-  let binaries _program = []
+  let binaries program =
+    let bufs = List.map (CArray.make char) (binary_sizes program) in
+    let param_value = CArray.of_list (ptr char) (List.map CArray.start bufs) in
+    C.clGetProgramInfo program T._CL_PROGRAM_BINARIES
+      (Unsigned.Size_t.of_int (CArray_ext.size param_value))
+      (to_voidp (CArray.start param_value))
+      (from_voidp size_t null) |> check_error;
+    List.map CArray_ext.to_bytes bufs
 
   let build_status program device =
     Info.value (C.clGetProgramBuildInfo program device
