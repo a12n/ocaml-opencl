@@ -605,8 +605,9 @@ module Device = struct
     | c when c = T._CL_GLOBAL -> Some `Global
     | _other -> failwith "Cl.Device.local_mem_type"
 
-  (* TODO *)
-  let max_work_item_sizes _device = [||]
+  let max_work_item_sizes device =
+    Info.array (C.clGetDeviceInfo device T._CL_DEVICE_MAX_WORK_ITEM_SIZES)
+      size_t |> Array.map Unsigned.Size_t.to_int
 
   let platform device =
     Info.value (C.clGetDeviceInfo device T._CL_DEVICE_PLATFORM) T.cl_platform_id
