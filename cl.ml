@@ -455,38 +455,109 @@ module Device = struct
   let version device =
     Info.string (C.clGetDeviceInfo device T._CL_DEVICE_VERSION)
 
-  (* TODO *)
-  let address_bits _device = 0
-  let global_mem_cache_size _device = 0L
-  let global_mem_cacheline_size _device = 0
-  let global_mem_size _device = 0L
-  let image2d_max_height _device = 0
-  let image2d_max_width _device = 0
-  let image3d_max_depth _device = 0
-  let image3d_max_height _device = 0
-  let image3d_max_width _device = 0
-  let local_mem_size _device = 0L
-  let max_clock_frequency _device = 0
-  let max_compute_units _device = 0
-  let max_constant_args _device = 0
-  let max_constant_buffer_size _device = 0L
-  let max_mem_alloc_size _device = 0L
-  let max_parameter_size _device = 0
-  let max_read_image_args _device = 0
-  let max_samplers _device = 0
-  let max_work_group_size _device = 0
-  let max_work_item_dimensions _device = 0
-  let max_write_image_args _device = 0
-  let mem_base_addr_align _device = 0
-  let min_data_type_align_size _device = 0
-  let preferred_vector_width_char _device = 0
-  let preferred_vector_width_double _device = 0
-  let preferred_vector_width_float _device = 0
-  let preferred_vector_width_int _device = 0
-  let preferred_vector_width_long _device = 0
-  let preferred_vector_width_short _device = 0
-  let profiling_timer_resolution _device = 0
-  let vendor_id _device = 0
+  let address_bits device =
+    Info.cl_uint (C.clGetDeviceInfo device T._CL_DEVICE_ADDRESS_BITS)
+
+  let global_mem_cache_size device =
+    Info.cl_ulong (C.clGetDeviceInfo device T._CL_DEVICE_GLOBAL_MEM_CACHE_SIZE)
+
+  let global_mem_cacheline_size device =
+    Info.cl_uint (C.clGetDeviceInfo device
+                    T._CL_DEVICE_GLOBAL_MEM_CACHELINE_SIZE)
+
+  let global_mem_size device =
+    Info.cl_ulong (C.clGetDeviceInfo device T._CL_DEVICE_GLOBAL_MEM_SIZE)
+
+  let image2d_max_height device =
+    Info.size_t (C.clGetDeviceInfo device T._CL_DEVICE_IMAGE2D_MAX_HEIGHT)
+
+  let image2d_max_width device =
+    Info.size_t (C.clGetDeviceInfo device T._CL_DEVICE_IMAGE2D_MAX_WIDTH)
+
+  let image3d_max_depth device =
+    Info.size_t (C.clGetDeviceInfo device T._CL_DEVICE_IMAGE3D_MAX_DEPTH)
+
+  let image3d_max_height device =
+    Info.size_t (C.clGetDeviceInfo device T._CL_DEVICE_IMAGE3D_MAX_HEIGHT)
+
+  let image3d_max_width device =
+    Info.size_t (C.clGetDeviceInfo device T._CL_DEVICE_IMAGE3D_MAX_WIDTH)
+
+  let local_mem_size device =
+    Info.cl_ulong (C.clGetDeviceInfo device T._CL_DEVICE_LOCAL_MEM_SIZE)
+
+  let max_clock_frequency device =
+    Info.cl_uint (C.clGetDeviceInfo device T._CL_DEVICE_MAX_CLOCK_FREQUENCY)
+
+  let max_compute_units device =
+    Info.cl_uint (C.clGetDeviceInfo device T._CL_DEVICE_MAX_COMPUTE_UNITS)
+
+  let max_constant_args device =
+    Info.cl_uint (C.clGetDeviceInfo device T._CL_DEVICE_MAX_CONSTANT_ARGS)
+
+  let max_constant_buffer_size device =
+    Info.cl_ulong (C.clGetDeviceInfo device
+                     T._CL_DEVICE_MAX_CONSTANT_BUFFER_SIZE)
+
+  let max_mem_alloc_size device =
+    Info.cl_ulong (C.clGetDeviceInfo device T._CL_DEVICE_MAX_MEM_ALLOC_SIZE)
+
+  let max_parameter_size device =
+    Info.size_t (C.clGetDeviceInfo device T._CL_DEVICE_MAX_PARAMETER_SIZE)
+
+  let max_read_image_args device =
+    Info.cl_uint (C.clGetDeviceInfo device T._CL_DEVICE_MAX_READ_IMAGE_ARGS)
+
+  let max_samplers device =
+    Info.cl_uint (C.clGetDeviceInfo device T._CL_DEVICE_MAX_SAMPLERS)
+
+  let max_work_group_size device =
+    Info.size_t (C.clGetDeviceInfo device T._CL_DEVICE_MAX_WORK_GROUP_SIZE)
+
+  let max_work_item_dimensions device =
+    Info.cl_uint (C.clGetDeviceInfo device
+                    T._CL_DEVICE_MAX_WORK_ITEM_DIMENSIONS)
+
+  let max_write_image_args device =
+    Info.cl_uint (C.clGetDeviceInfo device T._CL_DEVICE_MAX_WRITE_IMAGE_ARGS)
+
+  let mem_base_addr_align device =
+    Info.cl_uint (C.clGetDeviceInfo device T._CL_DEVICE_MEM_BASE_ADDR_ALIGN)
+
+  let min_data_type_align_size device =
+    Info.cl_uint (C.clGetDeviceInfo device
+                    T._CL_DEVICE_MIN_DATA_TYPE_ALIGN_SIZE)
+
+  let preferred_vector_width_char device =
+    Info.cl_uint (C.clGetDeviceInfo device
+                    T._CL_DEVICE_PREFERRED_VECTOR_WIDTH_CHAR)
+
+  let preferred_vector_width_double device =
+    Info.cl_uint (C.clGetDeviceInfo device
+                    T._CL_DEVICE_PREFERRED_VECTOR_WIDTH_DOUBLE)
+
+  let preferred_vector_width_float device =
+    Info.cl_uint (C.clGetDeviceInfo device
+                    T._CL_DEVICE_PREFERRED_VECTOR_WIDTH_FLOAT)
+
+  let preferred_vector_width_int device =
+    Info.cl_uint (C.clGetDeviceInfo device
+                    T._CL_DEVICE_PREFERRED_VECTOR_WIDTH_INT)
+
+  let preferred_vector_width_long device =
+    Info.cl_uint (C.clGetDeviceInfo device
+                    T._CL_DEVICE_PREFERRED_VECTOR_WIDTH_LONG)
+
+  let preferred_vector_width_short device =
+    Info.cl_uint (C.clGetDeviceInfo device
+                    T._CL_DEVICE_PREFERRED_VECTOR_WIDTH_SHORT)
+
+  let profiling_timer_resolution device =
+    Info.cl_uint (C.clGetDeviceInfo device
+                    T._CL_DEVICE_PROFILING_TIMER_RESOLUTION)
+
+  let vendor_id device =
+    Info.cl_uint (C.clGetDeviceInfo device T._CL_DEVICE_VENDOR_ID)
 
   let available device =
     Info.cl_bool (C.clGetDeviceInfo device T._CL_DEVICE_AVAILABLE)
