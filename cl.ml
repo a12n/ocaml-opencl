@@ -658,8 +658,7 @@ module Mem = struct
     | c when c = T._CL_MEM_OBJECT_IMAGE3D -> `Image3d
     | _other -> failwith "Cl.Mem.mem_type"
 
-  (* TODO *)
-  let size _mem = 0
+  let size mem = Info.size_t (C.clGetMemObjectInfo mem T._CL_MEM_SIZE)
 
   type intensity_channel_type =
     [ `Unorm_int8 | `Unorm_int16 |
