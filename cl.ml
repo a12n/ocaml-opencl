@@ -23,6 +23,10 @@ module Gc_ext = struct
   let link_opt a = function Some b -> link a b | None -> ()
 end
 
+module Bitfield = struct
+  let has bitfield bits = Unsigned.UInt64.logand bitfield bits = bits
+end
+
 type buffer
 type image
 
