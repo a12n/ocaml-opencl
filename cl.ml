@@ -25,6 +25,12 @@ end
 
 module Bitfield = struct
   let has bitfield bits = Unsigned.UInt64.logand bitfield bits = bits
+
+  let to_flag_list descr bitfield =
+    List.fold_left
+      (fun flags (a, bits) ->
+         if has bitfield bits then a :: flags else flags)
+      [] descr
 end
 
 type buffer
