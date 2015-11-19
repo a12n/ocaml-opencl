@@ -668,9 +668,11 @@ module Context = struct
   type property =
     [ `Platform of platform ]
 
+  let _CL_CONTEXT_PLATFORM =
+    Nativeint.of_int32 (Unsigned.UInt32.to_int32 T._CL_CONTEXT_PLATFORM)
+
   let of_property = function `Platform platform ->
-    [ Unsigned.UInt32.to_int T._CL_CONTEXT_PLATFORM |> Nativeint.of_int;
-      raw_address_of_ptr (to_voidp platform) ]
+    [ _CL_CONTEXT_PLATFORM; raw_address_of_ptr (to_voidp platform) ]
 
   let of_property_list properties =
     List.fold_right (@)
