@@ -686,9 +686,11 @@ module Context = struct
       (`Platform platform) :: (to_property_list rest)
     | _other :: rest -> to_property_list rest
 
-  let notify_proxy callback err_info _priv_data _size _user_data =
-    (* TODO: Make bytes of priv data and pass it to callback *)
-    callback err_info Bytes.empty
+  let notify_proxy callback err_info priv_data size _user_data =
+    let length = Unsigned.Size_t.to_int size in
+    let priv_data = string_from_ptr
+        (from_voidp char priv_data) ~length |> Bytes.of_string in
+    callback err_info priv_data
 
   let create ?notify properties devices =
     let properties = CArray.of_list T.cl_context_properties
