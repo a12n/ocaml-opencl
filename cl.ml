@@ -179,9 +179,11 @@ module Info = struct
       (from_voidp size_t null) |> check_error;
     param_value
 
-  let array info_function typ = carray info_function typ |> CArray_ext.to_array
+  let array ?length info_function typ =
+    carray ?length info_function typ |> CArray_ext.to_array
 
-  let list info_function typ = carray info_function typ |> CArray.to_list
+  let list ?length info_function typ =
+    carray ?length info_function typ |> CArray.to_list
 
   let string info_function =
     let chars = carray info_function char in
