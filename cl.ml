@@ -163,12 +163,19 @@ let to_bool = ((<>) T._CL_FALSE)
 
 (* Get various info attributes of OpenCL objects. *)
 module Info = struct
-  let carray info_function typ =
+  let carray_length info_function typ =
     let param_size = allocate size_t Unsigned.Size_t.zero in
     info_function Unsigned.Size_t.zero null param_size |> check_error;
-    let param_value = CArray.make typ
-        ((Unsigned.Size_t.to_int (!@ param_size)) / (sizeof typ)) in
-    info_function (!@ param_size) (to_voidp (CArray.start param_value))
+    (Unsigned.Size_t.to_int (!@ param_size)) / (sizeof typ)
+
+  let carray ?length info_function typ =
+    let length =
+      match length with
+      | Some length -> length
+      | None -> carray_length info_function typ in
+    let param_value = CArray.make typ length in
+    info_function (Unsigned.Size_t.of_int (length * (sizeof typ)))
+      (to_voidp (CArray.start param_value))
       (from_voidp size_t null) |> check_error;
     param_value
 
