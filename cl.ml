@@ -678,6 +678,14 @@ module Context = struct
     List.fold_right (@)
       (List.map of_property properties) [Nativeint.zero]
 
+  let rec to_property_list = function
+    | [] -> []
+    | 0n :: _rest -> []
+    | (tag :: addr :: rest) when tag = _CL_CONTEXT_PLATFORM ->
+      let platform = from_voidp T._cl_platform_id (ptr_of_raw_address addr) in
+      (`Platform platform) :: (to_property_list rest)
+    | _other :: rest -> to_property_list rest
+
   let notify_proxy callback err_info _priv_data _size _user_data =
     (* TODO: Make bytes of priv data and pass it to callback *)
     callback err_info Bytes.empty
@@ -714,8 +722,9 @@ module Context = struct
   let devices context =
     Info.list (C.clGetContextInfo context T._CL_CONTEXT_DEVICES) T.cl_device_id
 
-  (* TODO *)
-  let properties _context = []
+  let properties context =
+    Info.list (C.clGetContextInfo context T._CL_CONTEXT_PROPERTIES)
+      T.cl_context_properties |> to_property_list
 end
 
 module Mem = struct
