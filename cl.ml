@@ -175,10 +175,11 @@ module Info = struct
       (from_voidp size_t null) |> check_error;
     CArray.get param_value 0
 
-  let bool info_function = value info_function T.cl_bool |> to_bool
+  (* CL values *)
 
-  (* cl_ulong -> int64 *)
-  let int64 info_function =
+  let cl_bool info_function = value info_function T.cl_bool |> to_bool
+
+  let cl_ulong info_function =
     value info_function T.cl_ulong |> Unsigned.UInt64.to_int64
 end
 
@@ -480,19 +481,20 @@ module Device = struct
   let vendor_id _device = 0
 
   let available device =
-    Info.bool (C.clGetDeviceInfo device T._CL_DEVICE_AVAILABLE)
+    Info.cl_bool (C.clGetDeviceInfo device T._CL_DEVICE_AVAILABLE)
 
   let compiler_available device =
-    Info.bool (C.clGetDeviceInfo device T._CL_DEVICE_COMPILER_AVAILABLE)
+    Info.cl_bool (C.clGetDeviceInfo device T._CL_DEVICE_COMPILER_AVAILABLE)
 
   let endian_little device =
-    Info.bool (C.clGetDeviceInfo device T._CL_DEVICE_ENDIAN_LITTLE)
+    Info.cl_bool (C.clGetDeviceInfo device T._CL_DEVICE_ENDIAN_LITTLE)
 
   let error_correction_support device =
-    Info.bool (C.clGetDeviceInfo device T._CL_DEVICE_ERROR_CORRECTION_SUPPORT)
+    Info.cl_bool (C.clGetDeviceInfo device
+                    T._CL_DEVICE_ERROR_CORRECTION_SUPPORT)
 
   let image_support device =
-    Info.bool (C.clGetDeviceInfo device T._CL_DEVICE_IMAGE_SUPPORT)
+    Info.cl_bool (C.clGetDeviceInfo device T._CL_DEVICE_IMAGE_SUPPORT)
 
   (* TODO *)
   let single_fp_config _device =
@@ -912,7 +914,7 @@ module Sampler = struct
     | _other -> failwith "Cl.Sampler.filter_mode"
 
   let normalized_coords sampler =
-    Info.bool (C.clGetSamplerInfo sampler T._CL_SAMPLER_NORMALIZED_COORDS)
+    Info.cl_bool (C.clGetSamplerInfo sampler T._CL_SAMPLER_NORMALIZED_COORDS)
 end
 
 module Program = struct
@@ -1134,16 +1136,20 @@ module Event = struct
     | _other -> failwith "Cl.Event.command_execution_status"
 
   let command_queued event =
-    Info.int64 (C.clGetEventProfilingInfo event T._CL_PROFILING_COMMAND_QUEUED)
+    Info.cl_ulong (C.clGetEventProfilingInfo event
+                     T._CL_PROFILING_COMMAND_QUEUED)
 
   let command_submit event =
-    Info.int64 (C.clGetEventProfilingInfo event T._CL_PROFILING_COMMAND_SUBMIT)
+    Info.cl_ulong (C.clGetEventProfilingInfo event
+                     T._CL_PROFILING_COMMAND_SUBMIT)
 
   let command_start event =
-    Info.int64 (C.clGetEventProfilingInfo event T._CL_PROFILING_COMMAND_START)
+    Info.cl_ulong (C.clGetEventProfilingInfo event
+                     T._CL_PROFILING_COMMAND_START)
 
   let command_end event =
-    Info.int64 (C.clGetEventProfilingInfo event T._CL_PROFILING_COMMAND_END)
+    Info.cl_ulong (C.clGetEventProfilingInfo event
+                     T._CL_PROFILING_COMMAND_END)
 end
 
 let unload_compiler () = C.clUnloadCompiler () |> check_error
