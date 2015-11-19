@@ -1133,11 +1133,17 @@ module Event = struct
     | c when c < 0l -> `Error (Int32.to_int c)
     | _other -> failwith "Cl.Event.command_execution_status"
 
-  (* TODO *)
-  let command_queued _event = 0L
-  let command_submit _event = 0L
-  let command_start _event = 0L
-  let command_end _event = 0L
+  let command_queued event =
+    Info.int64 (C.clGetEventProfilingInfo event T._CL_PROFILING_COMMAND_QUEUED)
+
+  let command_submit event =
+    Info.int64 (C.clGetEventProfilingInfo event T._CL_PROFILING_COMMAND_SUBMIT)
+
+  let command_start event =
+    Info.int64 (C.clGetEventProfilingInfo event T._CL_PROFILING_COMMAND_START)
+
+  let command_end event =
+    Info.int64 (C.clGetEventProfilingInfo event T._CL_PROFILING_COMMAND_END)
 end
 
 let unload_compiler () = C.clUnloadCompiler () |> check_error
