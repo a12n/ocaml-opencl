@@ -970,8 +970,15 @@ module Program = struct
   (* TODO *)
   let binaries _program = []
 
-  (* TODO *)
-  let build_status _program _device = None
+  let build_status program device =
+    Info.value (C.clGetProgramBuildInfo program device
+                  T._CL_PROGRAM_BUILD_STATUS)
+      T.cl_build_status |> function
+    | c when c = T._CL_BUILD_NONE -> None
+    | c when c = T._CL_BUILD_ERROR -> Some `Error
+    | c when c = T._CL_BUILD_SUCCESS -> Some `Success
+    | c when c = T._CL_BUILD_IN_PROGRESS -> Some `In_progress
+    | _other -> failwith "Cl.Program.build_status"
 
   let build_options program device =
     Info.string (C.clGetProgramBuildInfo program device
