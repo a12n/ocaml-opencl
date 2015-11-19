@@ -1099,6 +1099,10 @@ module Program = struct
   let source program =
     Info.string (C.clGetProgramInfo program T._CL_PROGRAM_SOURCE)
 
+  let binary_sizes program =
+    Info.list (C.clGetProgramInfo program T._CL_PROGRAM_BINARY_SIZES)
+      size_t |> List.map Unsigned.Size_t.to_int
+
   (* TODO *)
   let binaries _program = []
 
