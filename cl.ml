@@ -175,6 +175,11 @@ module Info = struct
       (from_voidp size_t null) |> check_error;
     CArray.get param_value 0
 
+  (* Ctypes values *)
+
+  let size_t info_function =
+    value info_function size_t |> Unsigned.Size_t.to_int
+
   (* CL values *)
 
   let cl_bool info_function = value info_function T.cl_bool |> to_bool
@@ -845,28 +850,22 @@ module Mem = struct
       T.cl_image_format |> to_image_format
 
   let image_element_size mem =
-    Info.value (C.clGetImageInfo mem T._CL_IMAGE_ELEMENT_SIZE)
-      size_t |> Unsigned.Size_t.to_int
+    Info.size_t (C.clGetImageInfo mem T._CL_IMAGE_ELEMENT_SIZE)
 
   let image_row_pitch mem =
-    Info.value (C.clGetImageInfo mem T._CL_IMAGE_ROW_PITCH)
-      size_t |> Unsigned.Size_t.to_int
+    Info.size_t (C.clGetImageInfo mem T._CL_IMAGE_ROW_PITCH)
 
   let image_slice_pitch mem =
-    Info.value (C.clGetImageInfo mem T._CL_IMAGE_SLICE_PITCH)
-      size_t |> Unsigned.Size_t.to_int
+    Info.size_t (C.clGetImageInfo mem T._CL_IMAGE_SLICE_PITCH)
 
   let image_width mem =
-    Info.value (C.clGetImageInfo mem T._CL_IMAGE_WIDTH)
-      size_t |> Unsigned.Size_t.to_int
+    Info.size_t (C.clGetImageInfo mem T._CL_IMAGE_WIDTH)
 
   let image_height mem =
-    Info.value (C.clGetImageInfo mem T._CL_IMAGE_HEIGHT)
-      size_t |> Unsigned.Size_t.to_int
+    Info.size_t (C.clGetImageInfo mem T._CL_IMAGE_HEIGHT)
 
   let image_depth mem =
-    Info.value (C.clGetImageInfo mem T._CL_IMAGE_DEPTH)
-      size_t |> Unsigned.Size_t.to_int
+    Info.size_t (C.clGetImageInfo mem T._CL_IMAGE_DEPTH)
 end
 
 module Sampler = struct
