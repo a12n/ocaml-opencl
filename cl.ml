@@ -26,6 +26,10 @@ end
 module Bitfield = struct
   let has bitfield bits = Unsigned.UInt64.logand bitfield bits = bits
 
+  let of_flag_list descr flags =
+    List.fold_left Unsigned.UInt64.logor Unsigned.UInt64.zero
+      (List.map (fun a -> List.assoc a descr) flags)
+
   let to_flag_list descr bitfield =
     List.fold_left
       (fun flags (a, bits) ->
