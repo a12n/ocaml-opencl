@@ -596,8 +596,13 @@ module Device = struct
       round_to_inf = Bitfield.has bits T._CL_FP_ROUND_TO_INF;
       fma = Bitfield.has bits T._CL_FP_FMA }
 
-  (* TODO *)
-  let device_type _device = []
+  let device_type device =
+    Info.value (C.clGetDeviceInfo device T._CL_DEVICE_TYPE)
+      T.cl_device_type |> Bitfield.to_flag_list
+      [ `Default, T._CL_DEVICE_TYPE_DEFAULT;
+        `Cpu, T._CL_DEVICE_TYPE_CPU;
+        `Gpu, T._CL_DEVICE_TYPE_GPU;
+        `Accelerator, T._CL_DEVICE_TYPE_ACCELERATOR ]
 
   let execution_capabilities device =
     let bits =
