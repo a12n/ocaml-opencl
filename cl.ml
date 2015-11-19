@@ -1099,9 +1099,35 @@ module Event = struct
     Info.value (C.clGetEventInfo event T._CL_EVENT_COMMAND_QUEUE)
       T.cl_command_queue
 
-  (* TODO *)
-  let command_type _event = `Marker
-  let command_execution_status _event = `Complete
+  let command_type event =
+    Info.value (C.clGetEventInfo event T._CL_EVENT_COMMAND_TYPE)
+      T.cl_command_type |> function
+    | c when c = T._CL_COMMAND_NDRANGE_KERNEL -> `Ndrange_kernel
+    | c when c = T._CL_COMMAND_TASK -> `Task
+    | c when c = T._CL_COMMAND_NATIVE_KERNEL -> `Native_kernel
+    | c when c = T._CL_COMMAND_READ_BUFFER -> `Read_buffer
+    | c when c = T._CL_COMMAND_WRITE_BUFFER -> `Write_buffer
+    | c when c = T._CL_COMMAND_COPY_BUFFER -> `Copy_buffer
+    | c when c = T._CL_COMMAND_READ_IMAGE -> `Read_image
+    | c when c = T._CL_COMMAND_WRITE_IMAGE -> `Write_image
+    | c when c = T._CL_COMMAND_COPY_IMAGE -> `Copy_image
+    | c when c = T._CL_COMMAND_COPY_IMAGE_TO_BUFFER -> `Copy_image_to_buffer
+    | c when c = T._CL_COMMAND_COPY_BUFFER_TO_IMAGE -> `Copy_buffer_to_image
+    | c when c = T._CL_COMMAND_MAP_BUFFER -> `Map_buffer
+    | c when c = T._CL_COMMAND_MAP_IMAGE -> `Map_image
+    | c when c = T._CL_COMMAND_UNMAP_MEM_OBJECT -> `Unmap_mem_object
+    | c when c = T._CL_COMMAND_MARKER -> `Marker
+    | _other -> failwith "Cl.Event.command_type"
+
+  let command_execution_status event =
+    Info.value (C.clGetEventInfo event T._CL_EVENT_COMMAND_EXECUTION_STATUS)
+      T.cl_int |> function
+    | c when c = T._CL_QUEUED -> `Queued
+    | c when c = T._CL_SUBMITTED -> `Submitted
+    | c when c = T._CL_RUNNING -> `Running
+    | c when c = T._CL_COMPLETE -> `Complete
+    | c when c < 0l -> `Error (Int32.to_int c)
+    | _other -> failwith "Cl.Event.command_execution_status"
 
   (* TODO *)
   let command_queued _event = 0L
