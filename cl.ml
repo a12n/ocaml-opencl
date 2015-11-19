@@ -1201,8 +1201,12 @@ module Kernel = struct
     Info.size_t (C.clGetKernelWorkGroupInfo kernel device
                    T._CL_KERNEL_WORK_GROUP_SIZE)
 
-  (* TODO *)
-  let compile_work_group_size _kernel _device = 0, 0, 0
+  let compile_work_group_size kernel device =
+    let a = Info.array ~length:3
+        (C.clGetKernelWorkGroupInfo kernel device
+           T._CL_KERNEL_COMPILE_WORK_GROUP_SIZE) size_t in
+    assert (Array.length a = 3);
+    Unsigned.Size_t.(to_int a.(0), to_int a.(1), to_int a.(2))
 
   let local_mem_size kernel device =
     Info.cl_ulong (C.clGetKernelWorkGroupInfo kernel device
