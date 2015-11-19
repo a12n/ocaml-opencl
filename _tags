@@ -1,7 +1,7 @@
 "gen": include
 
 true: safe_string
-true: warn(+A-32-34-44)
+true: warn(+A-32-34-44-48)
 
 <*.{mli,ml}>: package(ctypes.stubs)
 
