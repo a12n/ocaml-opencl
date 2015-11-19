@@ -87,9 +87,6 @@ module Command_queue = struct
   let properties _queue = []
 
   (* TODO *)
-  let set_properties _queue _properties = []
-
-  (* TODO *)
   let read_buffer ?(wait_list=[]) ?(blocking=true) ?(offset=0) ?size
       _queue _mem _ba = ()
 

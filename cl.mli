@@ -89,10 +89,6 @@ module Command_queue : sig
   val device : command_queue -> device
   val properties : command_queue -> property list
 
-  (* Modify properties. *)
-
-  val set_properties : command_queue -> property list -> property list
-
   (* Reading, writing, and copying buffer objects. *)
 
   val read_buffer : ?wait_list:(event list) -> ?blocking:bool ->
