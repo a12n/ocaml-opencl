@@ -534,4 +534,95 @@ module Make (T : Cstubs.Types.TYPE) = struct
     T.constant "CL_PROFILING_COMMAND_START" cl_profiling_info
   let _CL_PROFILING_COMMAND_END =
     T.constant "CL_PROFILING_COMMAND_END" cl_profiling_info
+
+  (**************)
+  (* OpenCL 1.1 *)
+  (**************)
+
+  (* Typedefs *)
+  let cl_buffer_create_type = T.typedef cl_uint "cl_buffer_create_type"
+
+  (* Struct types *)
+  type _cl_buffer_region
+  let _cl_buffer_region : _cl_buffer_region Ctypes_static.structure T.typ =
+    T.structure "_cl_buffer_region"
+  let origin = T.field _cl_buffer_region "origin" T.size_t
+  let size = T.field _cl_buffer_region "size" T.size_t
+  let () = T.seal _cl_buffer_region
+  let cl_buffer_region = T.typedef _cl_buffer_region "cl_buffer_region"
+
+  (* Error Codes *)
+  let _CL_MISALIGNED_SUB_BUFFER_OFFSET =
+    T.constant "CL_MISALIGNED_SUB_BUFFER_OFFSET" cl_int
+  let _CL_EXEC_STATUS_ERROR_FOR_EVENTS_IN_WAIT_LIST =
+    T.constant "CL_EXEC_STATUS_ERROR_FOR_EVENTS_IN_WAIT_LIST" cl_int
+  let _CL_INVALID_PROPERTY = T.constant "CL_INVALID_PROPERTY" cl_int
+
+  (* cl_device_info *)
+  let _CL_DEVICE_PREFERRED_VECTOR_WIDTH_HALF =
+    T.constant "CL_DEVICE_PREFERRED_VECTOR_WIDTH_HALF" cl_device_info
+  let _CL_DEVICE_HOST_UNIFIED_MEMORY =
+    T.constant "CL_DEVICE_HOST_UNIFIED_MEMORY" cl_device_info
+  let _CL_DEVICE_NATIVE_VECTOR_WIDTH_CHAR =
+    T.constant "CL_DEVICE_NATIVE_VECTOR_WIDTH_CHAR" cl_device_info
+  let _CL_DEVICE_NATIVE_VECTOR_WIDTH_SHORT =
+    T.constant "CL_DEVICE_NATIVE_VECTOR_WIDTH_SHORT" cl_device_info
+  let _CL_DEVICE_NATIVE_VECTOR_WIDTH_INT =
+    T.constant "CL_DEVICE_NATIVE_VECTOR_WIDTH_INT" cl_device_info
+  let _CL_DEVICE_NATIVE_VECTOR_WIDTH_LONG =
+    T.constant "CL_DEVICE_NATIVE_VECTOR_WIDTH_LONG" cl_device_info
+  let _CL_DEVICE_NATIVE_VECTOR_WIDTH_FLOAT =
+    T.constant "CL_DEVICE_NATIVE_VECTOR_WIDTH_FLOAT" cl_device_info
+  let _CL_DEVICE_NATIVE_VECTOR_WIDTH_DOUBLE =
+    T.constant "CL_DEVICE_NATIVE_VECTOR_WIDTH_DOUBLE" cl_device_info
+  let _CL_DEVICE_NATIVE_VECTOR_WIDTH_HALF =
+    T.constant "CL_DEVICE_NATIVE_VECTOR_WIDTH_HALF" cl_device_info
+  let _CL_DEVICE_OPENCL_C_VERSION =
+    T.constant "CL_DEVICE_OPENCL_C_VERSION" cl_device_info
+
+  (* cl_device_fp_config - bitfield *)
+  let _CL_FP_SOFT_FLOAT = T.constant "CL_FP_SOFT_FLOAT" cl_device_fp_config
+
+  (* cl_context_info *)
+  let _CL_CONTEXT_NUM_DEVICES =
+    T.constant "CL_CONTEXT_NUM_DEVICES" cl_context_info
+
+  (* cl_context_info + cl_context_properties *)
+  let _CL_CONTEXT_PLATFORM = T.constant "CL_CONTEXT_PLATFORM" cl_context_info
+
+  (* cl_channel_order *)
+  let _CL_Rx = T.constant "CL_Rx" cl_channel_order
+  let _CL_RGx = T.constant "CL_RGx" cl_channel_order
+  let _CL_RGBx = T.constant "CL_RGBx" cl_channel_order
+
+  (* cl_mem_info *)
+  let _CL_MEM_ASSOCIATED_MEMOBJECT =
+    T.constant "CL_MEM_ASSOCIATED_MEMOBJECT" cl_mem_info
+  let _CL_MEM_OFFSET = T.constant "CL_MEM_OFFSET" cl_mem_info
+
+  (* cl_addressing_mode *)
+  let _CL_ADDRESS_MIRRORED_REPEAT =
+    T.constant "CL_ADDRESS_MIRRORED_REPEAT" cl_addressing_mode
+
+  (* cl_kernel_work_group_info *)
+  let _CL_KERNEL_PREFERRED_WORK_GROUP_SIZE_MULTIPLE = T.constant
+      "CL_KERNEL_PREFERRED_WORK_GROUP_SIZE_MULTIPLE" cl_kernel_work_group_info
+  let _CL_KERNEL_PRIVATE_MEM_SIZE =
+    T.constant "CL_KERNEL_PRIVATE_MEM_SIZE" cl_kernel_work_group_info
+
+  (* cl_event_info *)
+  let _CL_EVENT_CONTEXT = T.constant "CL_EVENT_CONTEXT" cl_event_info
+
+  (* cl_command_type *)
+  let _CL_COMMAND_READ_BUFFER_RECT =
+    T.constant "CL_COMMAND_READ_BUFFER_RECT" cl_command_type
+  let _CL_COMMAND_WRITE_BUFFER_RECT =
+    T.constant "CL_COMMAND_WRITE_BUFFER_RECT" cl_command_type
+  let _CL_COMMAND_COPY_BUFFER_RECT =
+    T.constant "CL_COMMAND_COPY_BUFFER_RECT" cl_command_type
+  let _CL_COMMAND_USER = T.constant "CL_COMMAND_USER" cl_command_type
+
+  (* cl_buffer_create_type *)
+  let _CL_BUFFER_CREATE_TYPE_REGION =
+    T.constant "CL_BUFFER_CREATE_TYPE_REGION" cl_buffer_create_type
 end
