@@ -185,6 +185,7 @@ module Device : sig
   val driver_version : device -> string
   val extensions : device -> string
   val name : device -> string
+  val opencl_c_version : device -> string
   val profile : device -> string
   val vendor : device -> string
   val version : device -> string
@@ -214,9 +215,17 @@ module Device : sig
   val max_write_image_args : device -> int
   val mem_base_addr_align : device -> int
   val min_data_type_align_size : device -> int
+  val native_vector_width_char : device -> int
+  val native_vector_width_double : device -> int
+  val native_vector_width_float : device -> int
+  val native_vector_width_half : device -> int
+  val native_vector_width_int : device -> int
+  val native_vector_width_long : device -> int
+  val native_vector_width_short : device -> int
   val preferred_vector_width_char : device -> int
   val preferred_vector_width_double : device -> int
   val preferred_vector_width_float : device -> int
+  val preferred_vector_width_half : device -> int
   val preferred_vector_width_int : device -> int
   val preferred_vector_width_long : device -> int
   val preferred_vector_width_short : device -> int
@@ -229,6 +238,7 @@ module Device : sig
   val compiler_available : device -> bool
   val endian_little : device -> bool
   val error_correction_support : device -> bool
+  val host_unified_memory : device -> bool
   val image_support : device -> bool
 
   (* [fp_config] device info attributes. *)

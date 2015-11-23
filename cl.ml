@@ -485,6 +485,9 @@ module Device = struct
   let name device =
     Info.string (C.clGetDeviceInfo device T._CL_DEVICE_NAME)
 
+  let opencl_c_version device =
+    Info.string (C.clGetDeviceInfo device T._CL_DEVICE_OPENCL_C_VERSION)
+
   let profile device =
     Info.string (C.clGetDeviceInfo device T._CL_DEVICE_PROFILE)
 
@@ -567,6 +570,34 @@ module Device = struct
     Info.cl_uint (C.clGetDeviceInfo device
                     T._CL_DEVICE_MIN_DATA_TYPE_ALIGN_SIZE)
 
+  let native_vector_width_char device =
+    Info.cl_uint (C.clGetDeviceInfo device
+                    T._CL_DEVICE_NATIVE_VECTOR_WIDTH_CHAR)
+
+  let native_vector_width_double device =
+    Info.cl_uint (C.clGetDeviceInfo device
+                    T._CL_DEVICE_NATIVE_VECTOR_WIDTH_DOUBLE)
+
+  let native_vector_width_float device =
+    Info.cl_uint (C.clGetDeviceInfo device
+                    T._CL_DEVICE_NATIVE_VECTOR_WIDTH_FLOAT)
+
+  let native_vector_width_half device =
+    Info.cl_uint (C.clGetDeviceInfo device
+                    T._CL_DEVICE_NATIVE_VECTOR_WIDTH_HALF)
+
+  let native_vector_width_int device =
+    Info.cl_uint (C.clGetDeviceInfo device
+                    T._CL_DEVICE_NATIVE_VECTOR_WIDTH_INT)
+
+  let native_vector_width_long device =
+    Info.cl_uint (C.clGetDeviceInfo device
+                    T._CL_DEVICE_NATIVE_VECTOR_WIDTH_LONG)
+
+  let native_vector_width_short device =
+    Info.cl_uint (C.clGetDeviceInfo device
+                    T._CL_DEVICE_NATIVE_VECTOR_WIDTH_SHORT)
+
   let preferred_vector_width_char device =
     Info.cl_uint (C.clGetDeviceInfo device
                     T._CL_DEVICE_PREFERRED_VECTOR_WIDTH_CHAR)
@@ -578,6 +609,10 @@ module Device = struct
   let preferred_vector_width_float device =
     Info.cl_uint (C.clGetDeviceInfo device
                     T._CL_DEVICE_PREFERRED_VECTOR_WIDTH_FLOAT)
+
+  let preferred_vector_width_half device =
+    Info.cl_uint (C.clGetDeviceInfo device
+                    T._CL_DEVICE_PREFERRED_VECTOR_WIDTH_HALF)
 
   let preferred_vector_width_int device =
     Info.cl_uint (C.clGetDeviceInfo device
@@ -610,6 +645,9 @@ module Device = struct
   let error_correction_support device =
     Info.cl_bool (C.clGetDeviceInfo device
                     T._CL_DEVICE_ERROR_CORRECTION_SUPPORT)
+
+  let host_unified_memory device =
+    Info.cl_bool (C.clGetDeviceInfo device T._CL_DEVICE_HOST_UNIFIED_MEMORY)
 
   let image_support device =
     Info.cl_bool (C.clGetDeviceInfo device T._CL_DEVICE_IMAGE_SUPPORT)
