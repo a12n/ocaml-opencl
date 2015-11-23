@@ -283,16 +283,26 @@ module Mem : sig
 
   (* Create a buffer object. *)
 
+  type buffer_region = {
+    origin : int;
+    size : int;
+  }
+
   val create_buffer : context -> flag list ->
     [< `Use of ('a, 'b, Bigarray.c_layout) Bigarray.Genarray.t |
        `Alloc of ('a, 'b) Bigarray.kind * int array ] -> buffer mem
 
+  val create_sub_buffer : buffer mem -> flag list ->
+    [ `Region of buffer_region ] -> buffer mem
+
   (* Mem object info. *)
 
+  val associated_mem : buffer mem -> buffer mem option
   val context : 'k mem -> context
   val flags : 'k mem -> flag list
   val map_count : 'k mem -> int
   val mem_type : 'k mem -> mem_type
+  val offset : buffer mem -> int
   val size : 'k mem -> int
   (* TODO: host_ptr? *)
 

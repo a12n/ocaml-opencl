@@ -799,6 +799,11 @@ module Mem = struct
     | `Image2d -> T._CL_MEM_OBJECT_IMAGE2D
     | `Image3d -> T._CL_MEM_OBJECT_IMAGE3D
 
+  type buffer_region = {
+    origin : int;
+    size : int;
+  }
+
   let create_buffer context flags host_data =
     let flags = of_flag_list flags in
     let ba_opt, host_ptr, size =
@@ -822,6 +827,28 @@ module Mem = struct
       Gc_ext.link_opt mem ba_opt;
     mem
 
+  let create_sub_buffer buffer flags create_type =
+    let flags = of_flag_list flags in
+    let create_type, create_info =
+      match create_type with
+      | `Region {origin; size} ->
+        ( let region = make T.cl_buffer_region in
+          setf region T.origin (Unsigned.Size_t.of_int origin);
+          setf region T.size (Unsigned.Size_t.of_int size);
+          T._CL_BUFFER_CREATE_TYPE_REGION, (to_voidp (addr region)) ) in
+    let err = allocate T.cl_int T._CL_SUCCESS in
+    let mem = C.clCreateSubBuffer buffer flags create_type create_info err in
+    check_error (!@ err);
+    mem
+
+  let associated_mem mem =
+    let mem =
+      Info.value (C.clGetMemObjectInfo mem T._CL_MEM_ASSOCIATED_MEMOBJECT)
+        T.cl_mem in
+    if mem <> (from_voidp T._cl_mem null) then
+      Some mem
+    else None
+
   let context mem =
     Info.value (C.clGetMemObjectInfo mem T._CL_MEM_CONTEXT) T.cl_context
 
@@ -839,6 +866,8 @@ module Mem = struct
     | c when c = T._CL_MEM_OBJECT_IMAGE2D -> `Image2d
     | c when c = T._CL_MEM_OBJECT_IMAGE3D -> `Image3d
     | _other -> failwith "Cl.Mem.mem_type"
+
+  let offset mem = Info.size_t (C.clGetMemObjectInfo mem T._CL_MEM_OFFSET)
 
   let size mem = Info.size_t (C.clGetMemObjectInfo mem T._CL_MEM_SIZE)
 
