@@ -454,6 +454,7 @@ module Device = struct
     round_to_zero : bool;
     round_to_inf : bool;
     fma : bool;
+    soft_float : bool;
   }
 
   let of_device_type_list list =
@@ -622,7 +623,8 @@ module Device = struct
       round_to_nearest = Bitfield.has bits T._CL_FP_ROUND_TO_NEAREST;
       round_to_zero = Bitfield.has bits T._CL_FP_ROUND_TO_ZERO;
       round_to_inf = Bitfield.has bits T._CL_FP_ROUND_TO_INF;
-      fma = Bitfield.has bits T._CL_FP_FMA }
+      fma = Bitfield.has bits T._CL_FP_FMA;
+      soft_float = Bitfield.has bits T._CL_FP_SOFT_FLOAT }
 
   let device_type device =
     Info.value (C.clGetDeviceInfo device T._CL_DEVICE_TYPE)

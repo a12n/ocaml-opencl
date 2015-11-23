@@ -175,6 +175,7 @@ module Device : sig
     round_to_zero : bool;
     round_to_inf : bool;
     fma : bool;
+    soft_float : bool;
   }
 
   val get : platform -> [ device_type | `All ] list -> device list
