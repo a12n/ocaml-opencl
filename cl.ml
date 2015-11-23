@@ -1327,6 +1327,14 @@ module Kernel = struct
   let local_mem_size kernel device =
     Info.cl_ulong (C.clGetKernelWorkGroupInfo kernel device
                      T._CL_KERNEL_LOCAL_MEM_SIZE)
+
+  let preferred_work_group_size_multiple kernel device =
+    Info.size_t (C.clGetKernelWorkGroupInfo kernel device
+                   T._CL_KERNEL_PREFERRED_WORK_GROUP_SIZE_MULTIPLE)
+
+  let private_mem_size kernel device =
+    Info.cl_ulong (C.clGetKernelWorkGroupInfo kernel device
+                     T._CL_KERNEL_PRIVATE_MEM_SIZE)
 end
 
 module Event = struct

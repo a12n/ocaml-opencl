@@ -447,6 +447,8 @@ module Kernel : sig
   val work_group_size : kernel -> device -> int
   val compile_work_group_size : kernel -> device -> int * int * int
   val local_mem_size : kernel -> device -> int64
+  val preferred_work_group_size_multiple : kernel -> device -> int
+  val private_mem_size : kernel -> device -> int64
 end
 
 module Event : sig
