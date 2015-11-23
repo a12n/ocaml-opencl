@@ -121,6 +121,10 @@ let to_error = function
   | n when n = T._CL_IMAGE_FORMAT_NOT_SUPPORTED -> Image_format_not_supported
   | n when n = T._CL_BUILD_PROGRAM_FAILURE -> Build_program_failure
   | n when n = T._CL_MAP_FAILURE -> Map_failure
+  | n when n = T._CL_MISALIGNED_SUB_BUFFER_OFFSET ->
+    Misaligned_sub_buffer_offset
+  | n when n = T._CL_EXEC_STATUS_ERROR_FOR_EVENTS_IN_WAIT_LIST ->
+    Exec_status_error_for_events_in_wait_list
   | n when n = T._CL_INVALID_VALUE -> Invalid_value
   | n when n = T._CL_INVALID_DEVICE_TYPE -> Invalid_device_type
   | n when n = T._CL_INVALID_PLATFORM -> Invalid_platform
@@ -156,6 +160,7 @@ let to_error = function
   | n when n = T._CL_INVALID_BUFFER_SIZE -> Invalid_buffer_size
   | n when n = T._CL_INVALID_MIP_LEVEL -> Invalid_mip_level
   | n when n = T._CL_INVALID_GLOBAL_WORK_SIZE -> Invalid_global_work_size
+  | n when n = T._CL_INVALID_PROPERTY -> Invalid_property
   | _other -> failwith "Cl.to_error"
 
 exception Exn of error

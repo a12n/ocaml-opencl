@@ -1,4 +1,4 @@
-(** Binding for OpenCL 1.0. *)
+(** Binding for OpenCL 1.1. *)
 
 type buffer
 type image
@@ -27,6 +27,8 @@ type error =
   | Image_format_not_supported
   | Build_program_failure
   | Map_failure
+  | Misaligned_sub_buffer_offset
+  | Exec_status_error_for_events_in_wait_list
   | Invalid_value
   | Invalid_device_type
   | Invalid_platform
@@ -61,6 +63,7 @@ type error =
   | Invalid_buffer_size
   | Invalid_mip_level
   | Invalid_global_work_size
+  | Invalid_property
 
 exception Exn of error
 
