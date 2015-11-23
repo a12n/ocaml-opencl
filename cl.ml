@@ -1344,10 +1344,38 @@ module Event = struct
       `Read_image | `Write_image |
       `Copy_image | `Copy_image_to_buffer | `Copy_buffer_to_image |
       `Map_buffer | `Map_image | `Unmap_mem_object |
-      `Marker ]
+      `Marker |
+      `User ]
 
   type command_execution_status =
     [ `Queued | `Submitted | `Running | `Complete | `Error of int ]
+
+  let create context =
+    let err = allocate T.cl_int T._CL_SUCCESS in
+    let event = C.clCreateUserEvent context err in
+    check_error (!@ err);
+    event
+
+  let set_status event status =
+    let status =
+      match status with
+      | `Complete -> T._CL_COMPLETE
+      | `Error n when n < 0 -> Signed.Int32.of_int n
+      | _other -> failwith "Cl.Event.set_status" in
+    C.clSetUserEventStatus event status |> check_error
+
+  let set_callback event callback_type callback =
+    let callback_type =
+      match callback_type with
+      | `Complete -> T._CL_COMPLETE in
+    C.clSetEventCallback event callback_type
+      (fun event status _user_data ->
+         callback event
+           (match status with
+            | c when c = T._CL_COMPLETE -> `Complete
+            | c when c < 0l -> `Error (Signed.Int32.to_int c)
+            | _other -> failwith "Cl.Event.set_callback")) null |>
+    check_error
 
   let wait events =
     let events = CArray.of_list T.cl_event events in
@@ -1387,6 +1415,9 @@ module Event = struct
     | c when c = T._CL_COMPLETE -> `Complete
     | c when c < 0l -> `Error (Int32.to_int c)
     | _other -> failwith "Cl.Event.command_execution_status"
+
+  let context event =
+    Info.value (C.clGetEventInfo event T._CL_EVENT_CONTEXT) T.cl_context
 
   let command_queued event =
     Info.cl_ulong (C.clGetEventProfilingInfo event

@@ -458,11 +458,21 @@ module Event : sig
       `Read_image | `Write_image |
       `Copy_image | `Copy_image_to_buffer | `Copy_buffer_to_image |
       `Map_buffer | `Map_image | `Unmap_mem_object |
-      `Marker ]
+      `Marker |
+      `User ]
   (* TODO: Acquire/relase GL objects. *)
 
   type command_execution_status =
     [ `Queued | `Submitted | `Running | `Complete | `Error of int ]
+
+  (* User event *)
+
+  val create : context -> event
+
+  val set_status : event -> [< `Complete | `Error of int ] -> unit
+
+  val set_callback : event -> [< `Complete ] ->
+    (event -> [< `Complete | `Error of int ] -> unit) -> unit
 
   (* Wait for events. *)
 
@@ -473,6 +483,7 @@ module Event : sig
   val command_queue : event -> command_queue
   val command_type : event -> command_type
   val command_execution_status : event -> command_execution_status
+  val context : event -> context
 
   (* Event profiling info. *)
 
