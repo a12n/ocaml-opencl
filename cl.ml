@@ -1094,7 +1094,7 @@ end
 
 module Sampler = struct
   type addressing_mode =
-    [ `Clamp_to_edge | `Clamp | `Repeat ]
+    [ `Clamp_to_edge | `Clamp | `Repeat | `Mirrored_repeat ]
 
   type filter_mode =
     [ `Nearest | `Linear ]
@@ -1106,7 +1106,8 @@ module Sampler = struct
       | None -> T._CL_ADDRESS_NONE
       | Some `Clamp_to_edge -> T._CL_ADDRESS_CLAMP_TO_EDGE
       | Some `Clamp -> T._CL_ADDRESS_CLAMP
-      | Some `Repeat -> T._CL_ADDRESS_REPEAT in
+      | Some `Repeat -> T._CL_ADDRESS_REPEAT
+      | Some `Mirrored_repeat -> T._CL_ADDRESS_MIRRORED_REPEAT in
     let filter_mode =
       match filter with
       | `Nearest -> T._CL_FILTER_NEAREST
@@ -1127,6 +1128,7 @@ module Sampler = struct
     | c when c = T._CL_ADDRESS_CLAMP_TO_EDGE -> Some `Clamp_to_edge
     | c when c = T._CL_ADDRESS_CLAMP -> Some `Clamp
     | c when c = T._CL_ADDRESS_REPEAT -> Some `Repeat
+    | c when c = T._CL_ADDRESS_MIRRORED_REPEAT -> Some `Mirrored_repeat
     | _other -> failwith "Cl.Sampler.addressing_mode"
 
   let filter_mode sampler =

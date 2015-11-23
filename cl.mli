@@ -364,7 +364,7 @@ end
 
 module Sampler : sig
   type addressing_mode =
-    [ `Clamp_to_edge | `Clamp | `Repeat ]
+    [ `Clamp_to_edge | `Clamp | `Repeat | `Mirrored_repeat ]
 
   type filter_mode =
     [ `Nearest | `Linear ]
