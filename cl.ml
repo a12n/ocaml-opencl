@@ -71,6 +71,8 @@ type error =
   | Image_format_not_supported
   | Build_program_failure
   | Map_failure
+  | Misaligned_sub_buffer_offset
+  | Exec_status_error_for_events_in_wait_list
   | Invalid_value
   | Invalid_device_type
   | Invalid_platform
@@ -105,6 +107,7 @@ type error =
   | Invalid_buffer_size
   | Invalid_mip_level
   | Invalid_global_work_size
+  | Invalid_property
 
 let to_error = function
   | n when n = T._CL_DEVICE_NOT_FOUND -> Device_not_found
