@@ -490,10 +490,10 @@ module Event : sig
 
   val create : context -> event
 
-  val set_status : event -> [< `Complete | `Error of int ] -> unit
+  val set_status : event -> [ `Complete | `Error of int ] -> unit
 
-  val set_callback : event -> [< `Complete ] ->
-    (event -> [< `Complete | `Error of int ] -> unit) -> unit
+  val set_callback : event -> [ `Complete ] ->
+    (event -> [ `Complete | `Error of int ] -> unit) -> unit
 
   (* Wait for events. *)
 
