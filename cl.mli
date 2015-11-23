@@ -327,12 +327,15 @@ module Mem : sig
 
   type image_format =
     [ `R of channel_type |
+      `Rx of channel_type |
       `A of channel_type |
       `Intensity of intensity_channel_type |
       `Luminance of intensity_channel_type |
       `Rg of channel_type |
+      `Rgx of channel_type |
       `Ra of channel_type |
       `Rgb of rgb_channel_type |
+      `Rgbx of rgb_channel_type |
       `Rgba of channel_type |
       `Argb of argb_channel_type |
       `Bgra of argb_channel_type ]

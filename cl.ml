@@ -966,12 +966,15 @@ module Mem = struct
 
   type image_format =
     [ `R of channel_type |
+      `Rx of channel_type |
       `A of channel_type |
       `Intensity of intensity_channel_type |
       `Luminance of intensity_channel_type |
       `Rg of channel_type |
+      `Rgx of channel_type |
       `Ra of channel_type |
       `Rgb of rgb_channel_type |
+      `Rgbx of rgb_channel_type |
       `Rgba of channel_type |
       `Argb of argb_channel_type |
       `Bgra of argb_channel_type ]
@@ -980,14 +983,17 @@ module Mem = struct
     let order, data_type =
       match format with
       | `R data_type -> T._CL_R, of_channel_type data_type
+      | `Rx data_type -> T._CL_Rx, of_channel_type data_type
       | `A data_type -> T._CL_A, of_channel_type data_type
       | `Intensity data_type ->
         T._CL_INTENSITY, of_intensity_channel_type data_type
       | `Luminance data_type ->
         T._CL_LUMINANCE, of_intensity_channel_type data_type
       | `Rg data_type -> T._CL_RG, of_channel_type data_type
+      | `Rgx data_type -> T._CL_RGx, of_channel_type data_type
       | `Ra data_type -> T._CL_RA, of_channel_type data_type
       | `Rgb data_type -> T._CL_RGB, of_rgb_channel_type data_type
+      | `Rgbx data_type -> T._CL_RGBx, of_rgb_channel_type data_type
       | `Rgba data_type -> T._CL_RGBA, of_channel_type data_type
       | `Argb data_type -> T._CL_ARGB, of_argb_channel_type data_type
       | `Bgra data_type -> T._CL_BGRA, of_argb_channel_type data_type in
@@ -1001,14 +1007,17 @@ module Mem = struct
     let data_type = getf format T.image_channel_data_type in
     match order with
     | c when c = T._CL_R -> `R (to_channel_type data_type)
+    | c when c = T._CL_Rx -> `Rx (to_channel_type data_type)
     | c when c = T._CL_A -> `A (to_channel_type data_type)
     | c when c = T._CL_INTENSITY ->
       `Intensity (to_intensity_channel_type data_type)
     | c when c = T._CL_LUMINANCE ->
       `Luminance (to_intensity_channel_type data_type)
     | c when c = T._CL_RG -> `Rg (to_channel_type data_type)
+    | c when c = T._CL_RGx -> `Rgx (to_channel_type data_type)
     | c when c = T._CL_RA -> `Ra (to_channel_type data_type)
     | c when c = T._CL_RGB -> `Rgb (to_rgb_channel_type data_type)
+    | c when c = T._CL_RGBx -> `Rgbx (to_rgb_channel_type data_type)
     | c when c = T._CL_RGBA -> `Rgba (to_channel_type data_type)
     | c when c = T._CL_ARGB -> `Argb (to_argb_channel_type data_type)
     | c when c = T._CL_BGRA -> `Bgra (to_argb_channel_type data_type)
