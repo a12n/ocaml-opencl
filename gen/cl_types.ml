@@ -79,8 +79,6 @@ module Make (T : Cstubs.Types.TYPE) = struct
   let cl_device_type = T.typedef cl_bitfield "cl_device_type"
   let cl_platform_info = T.typedef cl_uint "cl_platform_info"
   let cl_device_info = T.typedef cl_uint "cl_device_info"
-  (* let cl_device_address_info = *)
-  (*   T.typedef cl_bitfield "cl_device_address_info" *)
   let cl_device_fp_config = T.typedef cl_bitfield "cl_device_fp_config"
   let cl_device_mem_cache_type = T.typedef cl_uint "cl_device_mem_cache_type"
   let cl_device_local_mem_type = T.typedef cl_uint "cl_device_local_mem_type"
