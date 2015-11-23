@@ -98,13 +98,33 @@ module Command_queue : sig
     ?offset:int -> ?size:int -> command_queue -> buffer mem ->
     ('a, 'b, Bigarray.c_layout) Bigarray.Genarray.t -> event
 
+  val read_buffer_rect : ?wait_list:(event list) -> ?blocking:bool ->
+    ?buffer_row_pitch:int -> ?buffer_slice_pitch:int ->
+    ?host_row_pitch:int -> ?host_slice_pitch:int ->
+    command_queue -> buffer mem -> buffer_origin:(int * int * int) ->
+    host_origin:(int * int * int) -> region:(int * int * int) ->
+    ('a, 'b, Bigarray.c_layout) Bigarray.Genarray.t -> event
+
   val write_buffer : ?wait_list:(event list) -> ?blocking:bool ->
     ?offset:int -> ?size:int -> command_queue -> buffer mem ->
+    ('a, 'b, Bigarray.c_layout) Bigarray.Genarray.t -> event
+
+  val write_buffer_rect : ?wait_list:(event list) -> ?blocking:bool ->
+    ?buffer_row_pitch:int -> ?buffer_slice_pitch:int ->
+    ?host_row_pitch:int -> ?host_slice_pitch:int ->
+    command_queue -> buffer mem -> buffer_origin:(int * int * int) ->
+    host_origin:(int * int * int) -> region:(int * int * int) ->
     ('a, 'b, Bigarray.c_layout) Bigarray.Genarray.t -> event
 
   val copy_buffer : ?wait_list:(event list) -> command_queue ->
     src_buffer:(buffer mem) -> dst_buffer:(buffer mem) ->
     src_offset:int -> dst_offset:int -> size:int -> event
+
+  val copy_buffer_rect : ?wait_list:(event list) -> ?src_row_pitch:int ->
+    ?src_slice_pitch:int -> ?dst_row_pitch:int -> ?dst_slice_pitch:int ->
+    command_queue -> src_buffer:buffer mem -> dst_buffer:buffer mem ->
+    src_origin:(int * int * int) -> dst_origin:(int * int * int) ->
+    region:(int * int * int) -> event
 
   (* Reading, writing, and copying image objects. *)
 
@@ -459,6 +479,7 @@ module Event : sig
       `Copy_image | `Copy_image_to_buffer | `Copy_buffer_to_image |
       `Map_buffer | `Map_image | `Unmap_mem_object |
       `Marker |
+      `Read_buffer_rect | `Write_buffer_rect | `Copy_buffer_rect |
       `User ]
   (* TODO: Acquire/relase GL objects. *)
 

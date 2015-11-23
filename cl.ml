@@ -313,11 +313,50 @@ module Command_queue = struct
       (CArray.start wait_list) event |> check_error;
     !@ event
 
+  let rw_buffer_rect c_function wait_list blocking buffer_row_pitch
+      buffer_slice_pitch host_row_pitch host_slice_pitch queue buffer
+      buffer_origin host_origin region ba =
+    let blocking = T._CL_TRUE in
+    let buffer_origin =
+      tuple3_to_carray size_t Unsigned.Size_t.of_int buffer_origin in
+    let host_origin =
+      tuple3_to_carray size_t Unsigned.Size_t.of_int host_origin in
+    let region = tuple3_to_carray size_t Unsigned.Size_t.of_int region in
+    let wait_list = CArray.of_list T.cl_event wait_list in
+    let event = allocate T.cl_event (from_voidp T._cl_event null) in
+    c_function queue buffer blocking
+      (CArray.start buffer_origin) (CArray.start host_origin)
+      (CArray.start region)
+      (Unsigned.Size_t.of_int buffer_row_pitch)
+      (Unsigned.Size_t.of_int buffer_slice_pitch)
+      (Unsigned.Size_t.of_int host_row_pitch)
+      (Unsigned.Size_t.of_int host_slice_pitch)
+      (to_voidp (bigarray_start genarray ba))
+      (Unsigned.UInt32.of_int (CArray.length wait_list))
+      (CArray.start wait_list) event |> check_error;
+    !@ event
+
   let read_buffer ?(wait_list=[]) ?(blocking=true) ?(offset=0) ?size =
     rw_buffer ?size C.clEnqueueReadBuffer wait_list blocking offset
 
+  let read_buffer_rect ?(wait_list=[]) ?(blocking=true)
+      ?(buffer_row_pitch=0) ?(buffer_slice_pitch=0)
+      ?(host_row_pitch=0) ?(host_slice_pitch=0) queue buffer
+      ~buffer_origin ~host_origin ~region ba =
+    rw_buffer_rect C.clEnqueueReadBufferRect wait_list blocking
+      buffer_row_pitch buffer_slice_pitch host_row_pitch host_slice_pitch
+      queue buffer buffer_origin host_origin region ba
+
   let write_buffer ?(wait_list=[]) ?(blocking=true) ?(offset=0) ?size =
     rw_buffer ?size C.clEnqueueWriteBuffer wait_list blocking offset
+
+  let write_buffer_rect ?(wait_list=[]) ?(blocking=true)
+      ?(buffer_row_pitch=0) ?(buffer_slice_pitch=0)
+      ?(host_row_pitch=0) ?(host_slice_pitch=0) queue buffer
+      ~buffer_origin ~host_origin ~region ba =
+    rw_buffer_rect C.clEnqueueWriteBufferRect wait_list blocking
+      buffer_row_pitch buffer_slice_pitch host_row_pitch host_slice_pitch
+      queue buffer buffer_origin host_origin region ba
 
   let copy_buffer ?(wait_list=[]) queue ~src_buffer ~dst_buffer
       ~src_offset ~dst_offset ~size =
@@ -326,6 +365,26 @@ module Command_queue = struct
     C.clEnqueueCopyBuffer queue src_buffer dst_buffer
       (Unsigned.Size_t.of_int src_offset) (Unsigned.Size_t.of_int dst_offset)
       (Unsigned.Size_t.of_int size)
+      (Unsigned.UInt32.of_int (CArray.length wait_list))
+      (CArray.start wait_list) event |> check_error;
+    !@ event
+
+  let copy_buffer_rect ?(wait_list=[]) ?(src_row_pitch=0) ?(src_slice_pitch=0)
+      ?(dst_row_pitch=0) ?(dst_slice_pitch=0) queue ~src_buffer ~dst_buffer
+      ~src_origin ~dst_origin ~region =
+    let src_origin =
+      tuple3_to_carray size_t Unsigned.Size_t.of_int src_origin in
+    let dst_origin =
+      tuple3_to_carray size_t Unsigned.Size_t.of_int dst_origin in
+    let region = tuple3_to_carray size_t Unsigned.Size_t.of_int region in
+    let wait_list = CArray.of_list T.cl_event wait_list in
+    let event = allocate T.cl_event (from_voidp T._cl_event null) in
+    C.clEnqueueCopyBufferRect queue src_buffer dst_buffer
+      (CArray.start src_origin) (CArray.start dst_origin)
+      (CArray.start region) (Unsigned.Size_t.of_int src_row_pitch)
+      (Unsigned.Size_t.of_int src_slice_pitch)
+      (Unsigned.Size_t.of_int dst_row_pitch)
+      (Unsigned.Size_t.of_int dst_slice_pitch)
       (Unsigned.UInt32.of_int (CArray.length wait_list))
       (CArray.start wait_list) event |> check_error;
     !@ event
@@ -1345,6 +1404,7 @@ module Event = struct
       `Copy_image | `Copy_image_to_buffer | `Copy_buffer_to_image |
       `Map_buffer | `Map_image | `Unmap_mem_object |
       `Marker |
+      `Read_buffer_rect | `Write_buffer_rect | `Copy_buffer_rect |
       `User ]
 
   type command_execution_status =
