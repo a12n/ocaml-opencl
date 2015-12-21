@@ -623,4 +623,251 @@ module Make (T : Cstubs.Types.TYPE) = struct
   (* cl_buffer_create_type *)
   let _CL_BUFFER_CREATE_TYPE_REGION =
     T.constant "CL_BUFFER_CREATE_TYPE_REGION" cl_buffer_create_type
+
+  (**************)
+  (* OpenCL 1.2 *)
+  (**************)
+
+  (* Typedefs *)
+  let cl_device_partition_property =
+    T.typedef intptr_t "cl_device_partition_property"
+  let cl_device_affinity_domain =
+    T.typedef cl_bitfield "cl_device_affinity_domain"
+  let cl_mem_migration_flags = T.typedef cl_bitfield "cl_mem_migration_flags"
+  let cl_program_binary_type = T.typedef cl_uint "cl_program_binary_type"
+  let cl_kernel_arg_info = T.typedef cl_uint "cl_kernel_arg_info"
+  let cl_kernel_arg_address_qualifier =
+    T.typedef cl_uint "cl_kernel_arg_address_qualifier"
+  let cl_kernel_arg_access_qualifier =
+    T.typedef cl_uint "cl_kernel_arg_access_qualifier"
+  let cl_kernel_arg_type_qualifier =
+    T.typedef cl_bitfield "cl_kernel_arg_type_qualifier"
+
+  (* Struct types *)
+  type _cl_image_desc
+  let _cl_image_desc : _cl_image_desc Ctypes_static.structure T.typ =
+    T.structure "_cl_image_desc"
+  let image_type = T.field _cl_image_desc "image_type" cl_mem_object_type
+  let image_width = T.field _cl_image_desc "image_width" T.size_t
+  let image_height = T.field _cl_image_desc "image_height" T.size_t
+  let image_depth = T.field _cl_image_desc "image_depth" T.size_t
+  let image_array_size = T.field _cl_image_desc "image_array_size" T.size_t
+  let image_row_pitch = T.field _cl_image_desc "image_row_pitch" T.size_t
+  let image_slice_pitch = T.field _cl_image_desc "image_slice_pitch" T.size_t
+  let num_mip_levels = T.field _cl_image_desc "num_mip_levels" cl_uint
+  let num_samples = T.field _cl_image_desc "num_samples" cl_uint
+  let buffer = T.field _cl_image_desc "buffer" cl_mem
+  let () = T.seal _cl_image_desc
+  let cl_image_desc = T.typedef _cl_image_desc "cl_image_desc"
+
+  (* Error Codes *)
+  let _CL_COMPILE_PROGRAM_FAILURE =
+    T.constant "CL_COMPILE_PROGRAM_FAILURE" cl_int
+  let _CL_LINKER_NOT_AVAILABLE = T.constant "CL_LINKER_NOT_AVAILABLE" cl_int
+  let _CL_LINK_PROGRAM_FAILURE = T.constant "CL_LINK_PROGRAM_FAILURE" cl_int
+  let _CL_DEVICE_PARTITION_FAILED =
+    T.constant "CL_DEVICE_PARTITION_FAILED" cl_int
+  let _CL_KERNEL_ARG_INFO_NOT_AVAILABLE =
+    T.constant "CL_KERNEL_ARG_INFO_NOT_AVAILABLE" cl_int
+  let _CL_INVALID_IMAGE_DESCRIPTOR =
+    T.constant "CL_INVALID_IMAGE_DESCRIPTOR" cl_int
+  let _CL_INVALID_COMPILER_OPTIONS =
+    T.constant "CL_INVALID_COMPILER_OPTIONS" cl_int
+  let _CL_INVALID_LINKER_OPTIONS = T.constant "CL_INVALID_LINKER_OPTIONS" cl_int
+  let _CL_INVALID_DEVICE_PARTITION_COUNT =
+    T.constant "CL_INVALID_DEVICE_PARTITION_COUNT" cl_int
+
+  (* cl_bool *)
+  let _CL_BLOCKING = _CL_TRUE
+  let _CL_NON_BLOCKING = _CL_FALSE
+
+  (* cl_device_type - bitfield *)
+  let _CL_DEVICE_TYPE_CUSTOM = T.constant "CL_DEVICE_TYPE_CUSTOM" cl_device_type
+
+  (* cl_device_info *)
+  let _CL_DEVICE_DOUBLE_FP_CONFIG =
+    T.constant "CL_DEVICE_DOUBLE_FP_CONFIG" cl_device_info
+  let _CL_DEVICE_LINKER_AVAILABLE =
+    T.constant "CL_DEVICE_LINKER_AVAILABLE" cl_device_info
+  let _CL_DEVICE_BUILT_IN_KERNELS =
+    T.constant "CL_DEVICE_BUILT_IN_KERNELS" cl_device_info
+  let _CL_DEVICE_IMAGE_MAX_BUFFER_SIZE =
+    T.constant "CL_DEVICE_IMAGE_MAX_BUFFER_SIZE" cl_device_info
+  let _CL_DEVICE_IMAGE_MAX_ARRAY_SIZE =
+    T.constant "CL_DEVICE_IMAGE_MAX_ARRAY_SIZE" cl_device_info
+  let _CL_DEVICE_PARENT_DEVICE =
+    T.constant "CL_DEVICE_PARENT_DEVICE" cl_device_info
+  let _CL_DEVICE_PARTITION_MAX_SUB_DEVICES =
+    T.constant "CL_DEVICE_PARTITION_MAX_SUB_DEVICES" cl_device_info
+  let _CL_DEVICE_PARTITION_PROPERTIES =
+    T.constant "CL_DEVICE_PARTITION_PROPERTIES" cl_device_info
+  let _CL_DEVICE_PARTITION_AFFINITY_DOMAIN =
+    T.constant "CL_DEVICE_PARTITION_AFFINITY_DOMAIN" cl_device_info
+  let _CL_DEVICE_PARTITION_TYPE =
+    T.constant "CL_DEVICE_PARTITION_TYPE" cl_device_info
+  let _CL_DEVICE_REFERENCE_COUNT =
+    T.constant "CL_DEVICE_REFERENCE_COUNT" cl_device_info
+  let _CL_DEVICE_PREFERRED_INTEROP_USER_SYNC =
+    T.constant "CL_DEVICE_PREFERRED_INTEROP_USER_SYNC" cl_device_info
+  let _CL_DEVICE_PRINTF_BUFFER_SIZE =
+    T.constant "CL_DEVICE_PRINTF_BUFFER_SIZE" cl_device_info
+  let _CL_DEVICE_IMAGE_PITCH_ALIGNMENT =
+    T.constant "CL_DEVICE_IMAGE_PITCH_ALIGNMENT" cl_device_info
+  let _CL_DEVICE_IMAGE_BASE_ADDRESS_ALIGNMENT =
+    T.constant "CL_DEVICE_IMAGE_BASE_ADDRESS_ALIGNMENT" cl_device_info
+
+  (* cl_device_fp_config - bitfield *)
+  let _CL_FP_CORRECTLY_ROUNDED_DIVIDE_SQRT =
+    T.constant "CL_FP_CORRECTLY_ROUNDED_DIVIDE_SQRT" cl_device_fp_config
+
+  (* cl_context_properties *)
+  let _CL_CONTEXT_INTEROP_USER_SYNC =
+    T.constant "CL_CONTEXT_INTEROP_USER_SYNC" cl_context_properties
+
+  (* cl_device_partition_property *)
+  let _CL_DEVICE_PARTITION_EQUALLY =
+    T.constant "CL_DEVICE_PARTITION_EQUALLY" cl_device_partition_property
+  let _CL_DEVICE_PARTITION_BY_COUNTS =
+    T.constant "CL_DEVICE_PARTITION_BY_COUNTS" cl_device_partition_property
+  let _CL_DEVICE_PARTITION_BY_COUNTS_LIST_END = T.constant
+      "CL_DEVICE_PARTITION_BY_COUNTS_LIST_END" cl_device_partition_property
+  let _CL_DEVICE_PARTITION_BY_AFFINITY_DOMAIN = T.constant
+      "CL_DEVICE_PARTITION_BY_AFFINITY_DOMAIN" cl_device_partition_property
+
+  (* cl_device_affinity_domain *)
+  let _CL_DEVICE_AFFINITY_DOMAIN_NUMA =
+    T.constant "CL_DEVICE_AFFINITY_DOMAIN_NUMA" cl_device_affinity_domain
+  let _CL_DEVICE_AFFINITY_DOMAIN_L4_CACHE =
+    T.constant "CL_DEVICE_AFFINITY_DOMAIN_L4_CACHE" cl_device_affinity_domain
+  let _CL_DEVICE_AFFINITY_DOMAIN_L3_CACHE =
+    T.constant "CL_DEVICE_AFFINITY_DOMAIN_L3_CACHE" cl_device_affinity_domain
+  let _CL_DEVICE_AFFINITY_DOMAIN_L2_CACHE =
+    T.constant "CL_DEVICE_AFFINITY_DOMAIN_L2_CACHE" cl_device_affinity_domain
+  let _CL_DEVICE_AFFINITY_DOMAIN_L1_CACHE =
+    T.constant "CL_DEVICE_AFFINITY_DOMAIN_L1_CACHE" cl_device_affinity_domain
+  let _CL_DEVICE_AFFINITY_DOMAIN_NEXT_PARTITIONABLE = T.constant
+      "CL_DEVICE_AFFINITY_DOMAIN_NEXT_PARTITIONABLE" cl_device_affinity_domain
+
+  (* cl_mem_flags - bitfield *)
+  let _CL_MEM_HOST_WRITE_ONLY = T.constant "CL_MEM_HOST_WRITE_ONLY" cl_mem_flags
+  let _CL_MEM_HOST_READ_ONLY = T.constant "CL_MEM_HOST_READ_ONLY" cl_mem_flags
+  let _CL_MEM_HOST_NO_ACCESS = T.constant "CL_MEM_HOST_NO_ACCESS" cl_mem_flags
+
+(* cl_mem_migration_flags - bitfield *)
+  let _CL_MIGRATE_MEM_OBJECT_HOST =
+    T.constant "CL_MIGRATE_MEM_OBJECT_HOST" cl_mem_migration_flags
+  let _CL_MIGRATE_MEM_OBJECT_CONTENT_UNDEFINED =
+    T.constant "CL_MIGRATE_MEM_OBJECT_CONTENT_UNDEFINED" cl_mem_migration_flags
+
+  (* cl_channel_order *)
+  let _CL_DEPTH = T.constant "CL_DEPTH" cl_channel_order
+  let _CL_DEPTH_STENCIL = T.constant "CL_DEPTH_STENCIL" cl_channel_order
+
+  (* cl_channel_type *)
+  let _CL_UNORM_INT24 = T.constant "CL_UNORM_INT24" cl_channel_type
+
+  (* cl_mem_object_type *)
+  let _CL_MEM_OBJECT_IMAGE2D_ARRAY =
+    T.constant "CL_MEM_OBJECT_IMAGE2D_ARRAY" cl_mem_object_type
+  let _CL_MEM_OBJECT_IMAGE1D =
+    T.constant "CL_MEM_OBJECT_IMAGE1D" cl_mem_object_type
+  let _CL_MEM_OBJECT_IMAGE1D_ARRAY =
+    T.constant "CL_MEM_OBJECT_IMAGE1D_ARRAY" cl_mem_object_type
+  let _CL_MEM_OBJECT_IMAGE1D_BUFFER =
+    T.constant "CL_MEM_OBJECT_IMAGE1D_BUFFER" cl_mem_object_type
+
+  (* cl_image_info *)
+  let _CL_IMAGE_ARRAY_SIZE = T.constant "CL_IMAGE_ARRAY_SIZE" cl_image_info
+  let _CL_IMAGE_BUFFER = T.constant "CL_IMAGE_BUFFER" cl_image_info
+  let _CL_IMAGE_NUM_MIP_LEVELS =
+    T.constant "CL_IMAGE_NUM_MIP_LEVELS" cl_image_info
+  let _CL_IMAGE_NUM_SAMPLES = T.constant "CL_IMAGE_NUM_SAMPLES" cl_image_info
+
+  (* cl_addressing_mode *)
+  let _CL_ADDRESS_NONE = T.constant "CL_ADDRESS_NONE" cl_addressing_mode
+  let _CL_ADDRESS_CLAMP_TO_EDGE =
+    T.constant "CL_ADDRESS_CLAMP_TO_EDGE" cl_addressing_mode
+  let _CL_ADDRESS_CLAMP = T.constant "CL_ADDRESS_CLAMP" cl_addressing_mode
+  let _CL_ADDRESS_REPEAT = T.constant "CL_ADDRESS_REPEAT" cl_addressing_mode
+
+  (* cl_map_flags - bitfield *)
+  let _CL_MAP_WRITE_INVALIDATE_REGION =
+    T.constant "CL_MAP_WRITE_INVALIDATE_REGION" cl_map_flags
+
+  (* cl_program_info *)
+  let _CL_PROGRAM_NUM_KERNELS =
+    T.constant "CL_PROGRAM_NUM_KERNELS" cl_program_info
+  let _CL_PROGRAM_KERNEL_NAMES =
+    T.constant "CL_PROGRAM_KERNEL_NAMES" cl_program_info
+
+  (* cl_program_build_info *)
+  let _CL_PROGRAM_BINARY_TYPE =
+    T.constant "CL_PROGRAM_BINARY_TYPE" cl_program_build_info
+
+  (* cl_program_binary_type *)
+  let _CL_PROGRAM_BINARY_TYPE_NONE =
+    T.constant "CL_PROGRAM_BINARY_TYPE_NONE" cl_program_binary_type
+  let _CL_PROGRAM_BINARY_TYPE_COMPILED_OBJECT =
+    T.constant "CL_PROGRAM_BINARY_TYPE_COMPILED_OBJECT" cl_program_binary_type
+  let _CL_PROGRAM_BINARY_TYPE_LIBRARY =
+    T.constant "CL_PROGRAM_BINARY_TYPE_LIBRARY" cl_program_binary_type
+  let _CL_PROGRAM_BINARY_TYPE_EXECUTABLE =
+    T.constant "CL_PROGRAM_BINARY_TYPE_EXECUTABLE" cl_program_binary_type
+
+  (* cl_kernel_info *)
+  let _CL_KERNEL_ATTRIBUTES = T.constant "CL_KERNEL_ATTRIBUTES" cl_kernel_info
+
+  (* cl_kernel_arg_info *)
+  let _CL_KERNEL_ARG_ADDRESS_QUALIFIER =
+    T.constant "CL_KERNEL_ARG_ADDRESS_QUALIFIER" cl_kernel_arg_info
+  let _CL_KERNEL_ARG_ACCESS_QUALIFIER =
+    T.constant "CL_KERNEL_ARG_ACCESS_QUALIFIER" cl_kernel_arg_info
+  let _CL_KERNEL_ARG_TYPE_NAME =
+    T.constant "CL_KERNEL_ARG_TYPE_NAME" cl_kernel_arg_info
+  let _CL_KERNEL_ARG_TYPE_QUALIFIER =
+    T.constant "CL_KERNEL_ARG_TYPE_QUALIFIER" cl_kernel_arg_info
+  let _CL_KERNEL_ARG_NAME = T.constant "CL_KERNEL_ARG_NAME" cl_kernel_arg_info
+
+  (* cl_kernel_arg_address_qualifier *)
+  let _CL_KERNEL_ARG_ADDRESS_GLOBAL =
+    T.constant "CL_KERNEL_ARG_ADDRESS_GLOBAL" cl_kernel_arg_address_qualifier
+  let _CL_KERNEL_ARG_ADDRESS_LOCAL =
+    T.constant "CL_KERNEL_ARG_ADDRESS_LOCAL" cl_kernel_arg_address_qualifier
+  let _CL_KERNEL_ARG_ADDRESS_CONSTANT =
+    T.constant "CL_KERNEL_ARG_ADDRESS_CONSTANT" cl_kernel_arg_address_qualifier
+  let _CL_KERNEL_ARG_ADDRESS_PRIVATE =
+    T.constant "CL_KERNEL_ARG_ADDRESS_PRIVATE" cl_kernel_arg_address_qualifier
+
+  (* cl_kernel_arg_access_qualifier *)
+  let _CL_KERNEL_ARG_ACCESS_READ_ONLY =
+    T.constant "CL_KERNEL_ARG_ACCESS_READ_ONLY" cl_kernel_arg_access_qualifier
+  let _CL_KERNEL_ARG_ACCESS_WRITE_ONLY =
+    T.constant "CL_KERNEL_ARG_ACCESS_WRITE_ONLY" cl_kernel_arg_access_qualifier
+  let _CL_KERNEL_ARG_ACCESS_READ_WRITE =
+    T.constant "CL_KERNEL_ARG_ACCESS_READ_WRITE" cl_kernel_arg_access_qualifier
+  let _CL_KERNEL_ARG_ACCESS_NONE =
+    T.constant "CL_KERNEL_ARG_ACCESS_NONE" cl_kernel_arg_access_qualifier
+
+  (* cl_kernel_arg_type_qualifer *)
+  let _CL_KERNEL_ARG_TYPE_NONE =
+    T.constant "CL_KERNEL_ARG_TYPE_NONE" cl_kernel_arg_type_qualifier
+  let _CL_KERNEL_ARG_TYPE_CONST =
+    T.constant "CL_KERNEL_ARG_TYPE_CONST" cl_kernel_arg_type_qualifier
+  let _CL_KERNEL_ARG_TYPE_RESTRICT =
+    T.constant "CL_KERNEL_ARG_TYPE_RESTRICT" cl_kernel_arg_type_qualifier
+  let _CL_KERNEL_ARG_TYPE_VOLATILE =
+    T.constant "CL_KERNEL_ARG_TYPE_VOLATILE" cl_kernel_arg_type_qualifier
+
+  (* cl_kernel_work_group_info *)
+  let _CL_KERNEL_GLOBAL_WORK_SIZE =
+    T.constant "CL_KERNEL_GLOBAL_WORK_SIZE" cl_kernel_work_group_info
+
+  (* cl_command_type *)
+  let _CL_COMMAND_BARRIER = T.constant "CL_COMMAND_BARRIER" cl_command_type
+  let _CL_COMMAND_MIGRATE_MEM_OBJECTS =
+    T.constant "CL_COMMAND_MIGRATE_MEM_OBJECTS" cl_command_type
+  let _CL_COMMAND_FILL_BUFFER =
+    T.constant "CL_COMMAND_FILL_BUFFER" cl_command_type
+  let _CL_COMMAND_FILL_IMAGE =
+    T.constant "CL_COMMAND_FILL_IMAGE" cl_command_type
 end
