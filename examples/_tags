@@ -1,0 +1,1 @@
+<matvec.*>: package(cl), package(ctypes.stubs), package(ctypes.foreign)
