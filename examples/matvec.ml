@@ -12,12 +12,15 @@ let read_file fname =
   buf
 
 let () =
-  let platform = match Cl.Platform.get () with
-    | platform :: _ -> platform
-    | [] -> failwith "No platforms" in
-  let device = match Cl.Device.get platform [`All] with
+  let device =
+    match Cl.Platform.get () |>
+          List.map (fun platform ->
+              try Cl.Device.get platform [`All]
+              with Cl.Exn _ -> []
+            ) |> List.flatten with
     | device :: _ -> device
     | [] -> failwith "No devices" in
+  let platform = Cl.Device.platform device in
   let context = Cl.Context.create [`Platform platform] [device] in
   let source = read_file "matvec.cl" |> Bytes.to_string in
   let options = "" in
