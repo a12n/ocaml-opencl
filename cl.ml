@@ -1158,8 +1158,14 @@ module Sampler = struct
   type filter_mode =
     [ `Nearest | `Linear ]
 
-  let create context norm_coords addressing filter =
-    let normalized_coords = of_bool norm_coords in
+  type coords =
+    [ `Normalized | `Unnormalized ]
+
+  let create context coords addressing filter =
+    let normalized_coords =
+      match coords with
+      | `Normalized -> T._CL_TRUE
+      | `Unnormalized -> T._CL_FALSE in
     let addressing_mode =
       match addressing with
       | None -> T._CL_ADDRESS_NONE
@@ -1197,8 +1203,12 @@ module Sampler = struct
     | c when c = T._CL_FILTER_LINEAR -> `Linear
     | _other -> failwith "Cl.Sampler.filter_mode"
 
-  let normalized_coords sampler =
-    Info.cl_bool (C.clGetSamplerInfo sampler T._CL_SAMPLER_NORMALIZED_COORDS)
+  let coords sampler =
+    if Info.cl_bool (C.clGetSamplerInfo
+                       sampler
+                       T._CL_SAMPLER_NORMALIZED_COORDS)
+    then `Normalized
+    else `Unnormalized
 end
 
 module Program = struct

@@ -389,9 +389,12 @@ module Sampler : sig
   type filter_mode =
     [ `Nearest | `Linear ]
 
+  type coords =
+    [ `Normalized | `Unnormalized ]
+
   (* Creating sampler objects. *)
 
-  val create : context -> bool -> addressing_mode option -> filter_mode ->
+  val create : context -> coords -> addressing_mode option -> filter_mode ->
     sampler
 
   (* Sampler info attributes. *)
@@ -399,7 +402,7 @@ module Sampler : sig
   val context : sampler -> context
   val addressing_mode : sampler -> addressing_mode option
   val filter_mode : sampler -> filter_mode
-  val normalized_coords : sampler -> bool
+  val coords : sampler -> coords
 end
 
 module Program : sig
