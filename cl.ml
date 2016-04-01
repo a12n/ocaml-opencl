@@ -298,6 +298,8 @@ module Command_queue = struct
     let size = match size with
       | Some n -> n
       | None -> ba_size in
+    if (offset + size) > ba_size then
+      invalid_arg "Invalid size/offset for the host array";
     let wait_list = CArray.of_list T.cl_event wait_list in
     let event = allocate T.cl_event (from_voidp T._cl_event null) in
     c_function queue mem blocking (Unsigned.Size_t.of_int offset)
