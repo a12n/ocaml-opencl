@@ -71,6 +71,8 @@ type error =
   | Image_format_not_supported
   | Build_program_failure
   | Map_failure
+  | Misaligned_sub_buffer_offset
+  | Exec_status_error_for_events_in_wait_list
   | Invalid_value
   | Invalid_device_type
   | Invalid_platform
@@ -105,6 +107,7 @@ type error =
   | Invalid_buffer_size
   | Invalid_mip_level
   | Invalid_global_work_size
+  | Invalid_property
 
 let to_error = function
   | n when n = T._CL_DEVICE_NOT_FOUND -> Device_not_found
@@ -121,6 +124,10 @@ let to_error = function
   | n when n = T._CL_IMAGE_FORMAT_NOT_SUPPORTED -> Image_format_not_supported
   | n when n = T._CL_BUILD_PROGRAM_FAILURE -> Build_program_failure
   | n when n = T._CL_MAP_FAILURE -> Map_failure
+  | n when n = T._CL_MISALIGNED_SUB_BUFFER_OFFSET ->
+    Misaligned_sub_buffer_offset
+  | n when n = T._CL_EXEC_STATUS_ERROR_FOR_EVENTS_IN_WAIT_LIST ->
+    Exec_status_error_for_events_in_wait_list
   | n when n = T._CL_INVALID_VALUE -> Invalid_value
   | n when n = T._CL_INVALID_DEVICE_TYPE -> Invalid_device_type
   | n when n = T._CL_INVALID_PLATFORM -> Invalid_platform
@@ -156,6 +163,7 @@ let to_error = function
   | n when n = T._CL_INVALID_BUFFER_SIZE -> Invalid_buffer_size
   | n when n = T._CL_INVALID_MIP_LEVEL -> Invalid_mip_level
   | n when n = T._CL_INVALID_GLOBAL_WORK_SIZE -> Invalid_global_work_size
+  | n when n = T._CL_INVALID_PROPERTY -> Invalid_property
   | _other -> failwith "Cl.to_error"
 
 exception Exn of error
@@ -305,11 +313,50 @@ module Command_queue = struct
       (CArray.start wait_list) event |> check_error;
     !@ event
 
+  let rw_buffer_rect c_function wait_list blocking buffer_row_pitch
+      buffer_slice_pitch host_row_pitch host_slice_pitch queue buffer
+      buffer_origin host_origin region ba =
+    let blocking = T._CL_TRUE in
+    let buffer_origin =
+      tuple3_to_carray size_t Unsigned.Size_t.of_int buffer_origin in
+    let host_origin =
+      tuple3_to_carray size_t Unsigned.Size_t.of_int host_origin in
+    let region = tuple3_to_carray size_t Unsigned.Size_t.of_int region in
+    let wait_list = CArray.of_list T.cl_event wait_list in
+    let event = allocate T.cl_event (from_voidp T._cl_event null) in
+    c_function queue buffer blocking
+      (CArray.start buffer_origin) (CArray.start host_origin)
+      (CArray.start region)
+      (Unsigned.Size_t.of_int buffer_row_pitch)
+      (Unsigned.Size_t.of_int buffer_slice_pitch)
+      (Unsigned.Size_t.of_int host_row_pitch)
+      (Unsigned.Size_t.of_int host_slice_pitch)
+      (to_voidp (bigarray_start genarray ba))
+      (Unsigned.UInt32.of_int (CArray.length wait_list))
+      (CArray.start wait_list) event |> check_error;
+    !@ event
+
   let read_buffer ?(wait_list=[]) ?(blocking=true) ?(offset=0) ?size =
     rw_buffer ?size C.clEnqueueReadBuffer wait_list blocking offset
 
+  let read_buffer_rect ?(wait_list=[]) ?(blocking=true)
+      ?(buffer_row_pitch=0) ?(buffer_slice_pitch=0)
+      ?(host_row_pitch=0) ?(host_slice_pitch=0) queue buffer
+      ~buffer_origin ~host_origin ~region ba =
+    rw_buffer_rect C.clEnqueueReadBufferRect wait_list blocking
+      buffer_row_pitch buffer_slice_pitch host_row_pitch host_slice_pitch
+      queue buffer buffer_origin host_origin region ba
+
   let write_buffer ?(wait_list=[]) ?(blocking=true) ?(offset=0) ?size =
     rw_buffer ?size C.clEnqueueWriteBuffer wait_list blocking offset
+
+  let write_buffer_rect ?(wait_list=[]) ?(blocking=true)
+      ?(buffer_row_pitch=0) ?(buffer_slice_pitch=0)
+      ?(host_row_pitch=0) ?(host_slice_pitch=0) queue buffer
+      ~buffer_origin ~host_origin ~region ba =
+    rw_buffer_rect C.clEnqueueWriteBufferRect wait_list blocking
+      buffer_row_pitch buffer_slice_pitch host_row_pitch host_slice_pitch
+      queue buffer buffer_origin host_origin region ba
 
   let copy_buffer ?(wait_list=[]) queue ~src_buffer ~dst_buffer
       ~src_offset ~dst_offset ~size =
@@ -318,6 +365,26 @@ module Command_queue = struct
     C.clEnqueueCopyBuffer queue src_buffer dst_buffer
       (Unsigned.Size_t.of_int src_offset) (Unsigned.Size_t.of_int dst_offset)
       (Unsigned.Size_t.of_int size)
+      (Unsigned.UInt32.of_int (CArray.length wait_list))
+      (CArray.start wait_list) event |> check_error;
+    !@ event
+
+  let copy_buffer_rect ?(wait_list=[]) ?(src_row_pitch=0) ?(src_slice_pitch=0)
+      ?(dst_row_pitch=0) ?(dst_slice_pitch=0) queue ~src_buffer ~dst_buffer
+      ~src_origin ~dst_origin ~region =
+    let src_origin =
+      tuple3_to_carray size_t Unsigned.Size_t.of_int src_origin in
+    let dst_origin =
+      tuple3_to_carray size_t Unsigned.Size_t.of_int dst_origin in
+    let region = tuple3_to_carray size_t Unsigned.Size_t.of_int region in
+    let wait_list = CArray.of_list T.cl_event wait_list in
+    let event = allocate T.cl_event (from_voidp T._cl_event null) in
+    C.clEnqueueCopyBufferRect queue src_buffer dst_buffer
+      (CArray.start src_origin) (CArray.start dst_origin)
+      (CArray.start region) (Unsigned.Size_t.of_int src_row_pitch)
+      (Unsigned.Size_t.of_int src_slice_pitch)
+      (Unsigned.Size_t.of_int dst_row_pitch)
+      (Unsigned.Size_t.of_int dst_slice_pitch)
       (Unsigned.UInt32.of_int (CArray.length wait_list))
       (CArray.start wait_list) event |> check_error;
     !@ event
@@ -449,6 +516,7 @@ module Device = struct
     round_to_zero : bool;
     round_to_inf : bool;
     fma : bool;
+    soft_float : bool;
   }
 
   let of_device_type_list list =
@@ -478,6 +546,9 @@ module Device = struct
 
   let name device =
     Info.string (C.clGetDeviceInfo device T._CL_DEVICE_NAME)
+
+  let opencl_c_version device =
+    Info.string (C.clGetDeviceInfo device T._CL_DEVICE_OPENCL_C_VERSION)
 
   let profile device =
     Info.string (C.clGetDeviceInfo device T._CL_DEVICE_PROFILE)
@@ -561,6 +632,34 @@ module Device = struct
     Info.cl_uint (C.clGetDeviceInfo device
                     T._CL_DEVICE_MIN_DATA_TYPE_ALIGN_SIZE)
 
+  let native_vector_width_char device =
+    Info.cl_uint (C.clGetDeviceInfo device
+                    T._CL_DEVICE_NATIVE_VECTOR_WIDTH_CHAR)
+
+  let native_vector_width_double device =
+    Info.cl_uint (C.clGetDeviceInfo device
+                    T._CL_DEVICE_NATIVE_VECTOR_WIDTH_DOUBLE)
+
+  let native_vector_width_float device =
+    Info.cl_uint (C.clGetDeviceInfo device
+                    T._CL_DEVICE_NATIVE_VECTOR_WIDTH_FLOAT)
+
+  let native_vector_width_half device =
+    Info.cl_uint (C.clGetDeviceInfo device
+                    T._CL_DEVICE_NATIVE_VECTOR_WIDTH_HALF)
+
+  let native_vector_width_int device =
+    Info.cl_uint (C.clGetDeviceInfo device
+                    T._CL_DEVICE_NATIVE_VECTOR_WIDTH_INT)
+
+  let native_vector_width_long device =
+    Info.cl_uint (C.clGetDeviceInfo device
+                    T._CL_DEVICE_NATIVE_VECTOR_WIDTH_LONG)
+
+  let native_vector_width_short device =
+    Info.cl_uint (C.clGetDeviceInfo device
+                    T._CL_DEVICE_NATIVE_VECTOR_WIDTH_SHORT)
+
   let preferred_vector_width_char device =
     Info.cl_uint (C.clGetDeviceInfo device
                     T._CL_DEVICE_PREFERRED_VECTOR_WIDTH_CHAR)
@@ -572,6 +671,10 @@ module Device = struct
   let preferred_vector_width_float device =
     Info.cl_uint (C.clGetDeviceInfo device
                     T._CL_DEVICE_PREFERRED_VECTOR_WIDTH_FLOAT)
+
+  let preferred_vector_width_half device =
+    Info.cl_uint (C.clGetDeviceInfo device
+                    T._CL_DEVICE_PREFERRED_VECTOR_WIDTH_HALF)
 
   let preferred_vector_width_int device =
     Info.cl_uint (C.clGetDeviceInfo device
@@ -605,6 +708,9 @@ module Device = struct
     Info.cl_bool (C.clGetDeviceInfo device
                     T._CL_DEVICE_ERROR_CORRECTION_SUPPORT)
 
+  let host_unified_memory device =
+    Info.cl_bool (C.clGetDeviceInfo device T._CL_DEVICE_HOST_UNIFIED_MEMORY)
+
   let image_support device =
     Info.cl_bool (C.clGetDeviceInfo device T._CL_DEVICE_IMAGE_SUPPORT)
 
@@ -617,7 +723,8 @@ module Device = struct
       round_to_nearest = Bitfield.has bits T._CL_FP_ROUND_TO_NEAREST;
       round_to_zero = Bitfield.has bits T._CL_FP_ROUND_TO_ZERO;
       round_to_inf = Bitfield.has bits T._CL_FP_ROUND_TO_INF;
-      fma = Bitfield.has bits T._CL_FP_FMA }
+      fma = Bitfield.has bits T._CL_FP_FMA;
+      soft_float = Bitfield.has bits T._CL_FP_SOFT_FLOAT }
 
   let device_type device =
     Info.value (C.clGetDeviceInfo device T._CL_DEVICE_TYPE)
@@ -751,6 +858,11 @@ module Mem = struct
     | `Image2d -> T._CL_MEM_OBJECT_IMAGE2D
     | `Image3d -> T._CL_MEM_OBJECT_IMAGE3D
 
+  type buffer_region = {
+    origin : int;
+    size : int;
+  }
+
   let create_buffer context flags host_data =
     let flags = of_flag_list flags in
     let ba_opt, host_ptr, size =
@@ -774,6 +886,28 @@ module Mem = struct
       Gc_ext.link_opt mem ba_opt;
     mem
 
+  let create_sub_buffer buffer flags create_type =
+    let flags = of_flag_list flags in
+    let create_type, create_info =
+      match create_type with
+      | `Region {origin; size} ->
+        ( let region = make T.cl_buffer_region in
+          setf region T.origin (Unsigned.Size_t.of_int origin);
+          setf region T.size (Unsigned.Size_t.of_int size);
+          T._CL_BUFFER_CREATE_TYPE_REGION, (to_voidp (addr region)) ) in
+    let err = allocate T.cl_int T._CL_SUCCESS in
+    let mem = C.clCreateSubBuffer buffer flags create_type create_info err in
+    check_error (!@ err);
+    mem
+
+  let associated_mem mem =
+    let mem =
+      Info.value (C.clGetMemObjectInfo mem T._CL_MEM_ASSOCIATED_MEMOBJECT)
+        T.cl_mem in
+    if mem <> (from_voidp T._cl_mem null) then
+      Some mem
+    else None
+
   let context mem =
     Info.value (C.clGetMemObjectInfo mem T._CL_MEM_CONTEXT) T.cl_context
 
@@ -791,6 +925,8 @@ module Mem = struct
     | c when c = T._CL_MEM_OBJECT_IMAGE2D -> `Image2d
     | c when c = T._CL_MEM_OBJECT_IMAGE3D -> `Image3d
     | _other -> failwith "Cl.Mem.mem_type"
+
+  let offset mem = Info.size_t (C.clGetMemObjectInfo mem T._CL_MEM_OFFSET)
 
   let size mem = Info.size_t (C.clGetMemObjectInfo mem T._CL_MEM_SIZE)
 
@@ -889,12 +1025,15 @@ module Mem = struct
 
   type image_format =
     [ `R of channel_type |
+      `Rx of channel_type |
       `A of channel_type |
       `Intensity of intensity_channel_type |
       `Luminance of intensity_channel_type |
       `Rg of channel_type |
+      `Rgx of channel_type |
       `Ra of channel_type |
       `Rgb of rgb_channel_type |
+      `Rgbx of rgb_channel_type |
       `Rgba of channel_type |
       `Argb of argb_channel_type |
       `Bgra of argb_channel_type ]
@@ -903,14 +1042,17 @@ module Mem = struct
     let order, data_type =
       match format with
       | `R data_type -> T._CL_R, of_channel_type data_type
+      | `Rx data_type -> T._CL_Rx, of_channel_type data_type
       | `A data_type -> T._CL_A, of_channel_type data_type
       | `Intensity data_type ->
         T._CL_INTENSITY, of_intensity_channel_type data_type
       | `Luminance data_type ->
         T._CL_LUMINANCE, of_intensity_channel_type data_type
       | `Rg data_type -> T._CL_RG, of_channel_type data_type
+      | `Rgx data_type -> T._CL_RGx, of_channel_type data_type
       | `Ra data_type -> T._CL_RA, of_channel_type data_type
       | `Rgb data_type -> T._CL_RGB, of_rgb_channel_type data_type
+      | `Rgbx data_type -> T._CL_RGBx, of_rgb_channel_type data_type
       | `Rgba data_type -> T._CL_RGBA, of_channel_type data_type
       | `Argb data_type -> T._CL_ARGB, of_argb_channel_type data_type
       | `Bgra data_type -> T._CL_BGRA, of_argb_channel_type data_type in
@@ -924,14 +1066,17 @@ module Mem = struct
     let data_type = getf format T.image_channel_data_type in
     match order with
     | c when c = T._CL_R -> `R (to_channel_type data_type)
+    | c when c = T._CL_Rx -> `Rx (to_channel_type data_type)
     | c when c = T._CL_A -> `A (to_channel_type data_type)
     | c when c = T._CL_INTENSITY ->
       `Intensity (to_intensity_channel_type data_type)
     | c when c = T._CL_LUMINANCE ->
       `Luminance (to_intensity_channel_type data_type)
     | c when c = T._CL_RG -> `Rg (to_channel_type data_type)
+    | c when c = T._CL_RGx -> `Rgx (to_channel_type data_type)
     | c when c = T._CL_RA -> `Ra (to_channel_type data_type)
     | c when c = T._CL_RGB -> `Rgb (to_rgb_channel_type data_type)
+    | c when c = T._CL_RGBx -> `Rgbx (to_rgb_channel_type data_type)
     | c when c = T._CL_RGBA -> `Rgba (to_channel_type data_type)
     | c when c = T._CL_ARGB -> `Argb (to_argb_channel_type data_type)
     | c when c = T._CL_BGRA -> `Bgra (to_argb_channel_type data_type)
@@ -1008,7 +1153,7 @@ end
 
 module Sampler = struct
   type addressing_mode =
-    [ `Clamp_to_edge | `Clamp | `Repeat ]
+    [ `Clamp_to_edge | `Clamp | `Repeat | `Mirrored_repeat ]
 
   type filter_mode =
     [ `Nearest | `Linear ]
@@ -1026,7 +1171,8 @@ module Sampler = struct
       | None -> T._CL_ADDRESS_NONE
       | Some `Clamp_to_edge -> T._CL_ADDRESS_CLAMP_TO_EDGE
       | Some `Clamp -> T._CL_ADDRESS_CLAMP
-      | Some `Repeat -> T._CL_ADDRESS_REPEAT in
+      | Some `Repeat -> T._CL_ADDRESS_REPEAT
+      | Some `Mirrored_repeat -> T._CL_ADDRESS_MIRRORED_REPEAT in
     let filter_mode =
       match filter with
       | `Nearest -> T._CL_FILTER_NEAREST
@@ -1047,6 +1193,7 @@ module Sampler = struct
     | c when c = T._CL_ADDRESS_CLAMP_TO_EDGE -> Some `Clamp_to_edge
     | c when c = T._CL_ADDRESS_CLAMP -> Some `Clamp
     | c when c = T._CL_ADDRESS_REPEAT -> Some `Repeat
+    | c when c = T._CL_ADDRESS_MIRRORED_REPEAT -> Some `Mirrored_repeat
     | _other -> failwith "Cl.Sampler.addressing_mode"
 
   let filter_mode sampler =
@@ -1249,6 +1396,14 @@ module Kernel = struct
   let local_mem_size kernel device =
     Info.cl_ulong (C.clGetKernelWorkGroupInfo kernel device
                      T._CL_KERNEL_LOCAL_MEM_SIZE)
+
+  let preferred_work_group_size_multiple kernel device =
+    Info.size_t (C.clGetKernelWorkGroupInfo kernel device
+                   T._CL_KERNEL_PREFERRED_WORK_GROUP_SIZE_MULTIPLE)
+
+  let private_mem_size kernel device =
+    Info.cl_ulong (C.clGetKernelWorkGroupInfo kernel device
+                     T._CL_KERNEL_PRIVATE_MEM_SIZE)
 end
 
 module Event = struct
@@ -1258,10 +1413,39 @@ module Event = struct
       `Read_image | `Write_image |
       `Copy_image | `Copy_image_to_buffer | `Copy_buffer_to_image |
       `Map_buffer | `Map_image | `Unmap_mem_object |
-      `Marker ]
+      `Marker |
+      `Read_buffer_rect | `Write_buffer_rect | `Copy_buffer_rect |
+      `User ]
 
   type command_execution_status =
     [ `Queued | `Submitted | `Running | `Complete | `Error of int ]
+
+  let create context =
+    let err = allocate T.cl_int T._CL_SUCCESS in
+    let event = C.clCreateUserEvent context err in
+    check_error (!@ err);
+    event
+
+  let set_status event status =
+    let status =
+      match status with
+      | `Complete -> T._CL_COMPLETE
+      | `Error n when n < 0 -> Signed.Int32.of_int n
+      | _other -> failwith "Cl.Event.set_status" in
+    C.clSetUserEventStatus event status |> check_error
+
+  let set_callback event callback_type callback =
+    let callback_type =
+      match callback_type with
+      | `Complete -> T._CL_COMPLETE in
+    C.clSetEventCallback event callback_type
+      (fun event status _user_data ->
+         callback event
+           (match status with
+            | c when c = T._CL_COMPLETE -> `Complete
+            | c when c < 0l -> `Error (Signed.Int32.to_int c)
+            | _other -> failwith "Cl.Event.set_callback")) null |>
+    check_error
 
   let wait events =
     let events = CArray.of_list T.cl_event events in
@@ -1301,6 +1485,9 @@ module Event = struct
     | c when c = T._CL_COMPLETE -> `Complete
     | c when c < 0l -> `Error (Int32.to_int c)
     | _other -> failwith "Cl.Event.command_execution_status"
+
+  let context event =
+    Info.value (C.clGetEventInfo event T._CL_EVENT_CONTEXT) T.cl_context
 
   let command_queued event =
     Info.cl_ulong (C.clGetEventProfilingInfo event

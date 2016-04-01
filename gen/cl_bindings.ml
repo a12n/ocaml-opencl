@@ -297,4 +297,52 @@ module Make (F : Cstubs.FOREIGN) = struct
 
   let clGetExtensionFunctionAddress = F.foreign "clGetExtensionFunctionAddress"
       (ptr char @-> returning (ptr void))
+
+  (**************)
+  (* OpenCL 1.1 *)
+  (**************)
+
+  (** {2 Memory Object APIs} *)
+
+  let clCreateSubBuffer = F.foreign "clCreateSubBuffer"
+      (T.cl_mem @-> T.cl_mem_flags @-> T.cl_buffer_create_type @->
+       ptr void @-> ptr T.cl_int @-> returning T.cl_mem)
+
+  let clSetMemObjectDestructorCallback =
+    F.foreign "clSetMemObjectDestructorCallback"
+      (T.cl_mem @-> funptr (T.cl_mem @-> ptr void @-> returning void) @->
+       ptr void @-> returning T.cl_int)
+
+  (** {2 Event Object APIs} *)
+
+  let clCreateUserEvent = F.foreign "clCreateUserEvent"
+      (T.cl_context @-> ptr T.cl_int @-> returning T.cl_event)
+
+  let clSetUserEventStatus = F.foreign "clSetUserEventStatus"
+      (T.cl_event @-> T.cl_int @-> returning T.cl_int)
+
+  let clSetEventCallback = F.foreign "clSetEventCallback"
+      (T.cl_event @-> T.cl_int @->
+       funptr (T.cl_event @-> T.cl_int @-> ptr void @-> returning void) @->
+       ptr void @-> returning T.cl_int)
+
+  (** {2 Enqueued Commands APIs} *)
+
+  let clEnqueueReadBufferRect = F.foreign "clEnqueueReadBufferRect"
+      (T.cl_command_queue @-> T.cl_mem @-> T.cl_bool @-> ptr size_t @->
+       ptr size_t @-> ptr size_t @-> size_t @-> size_t @-> size_t @->
+       size_t @-> ptr void @-> T.cl_uint @-> ptr T.cl_event @->
+       ptr T.cl_event @-> returning T.cl_int)
+
+  let clEnqueueWriteBufferRect = F.foreign "clEnqueueWriteBufferRect"
+      (T.cl_command_queue @-> T.cl_mem @-> T.cl_bool @-> ptr size_t @->
+       ptr size_t @-> ptr size_t @-> size_t @-> size_t @-> size_t @->
+       size_t @-> ptr void @-> T.cl_uint @-> ptr T.cl_event @->
+       ptr T.cl_event @-> returning T.cl_int)
+
+  let clEnqueueCopyBufferRect = F.foreign "clEnqueueCopyBufferRect"
+      (T.cl_command_queue @-> T.cl_mem @-> T.cl_mem @-> ptr size_t @->
+       ptr size_t @-> ptr size_t @-> size_t @-> size_t @-> size_t @->
+       size_t @-> T.cl_uint @-> ptr T.cl_event @-> ptr T.cl_event @->
+       returning T.cl_int)
 end
