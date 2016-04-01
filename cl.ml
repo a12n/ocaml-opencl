@@ -302,9 +302,12 @@ module Command_queue = struct
   let rw_buffer ?size c_function wait_list blocking offset queue mem ba =
     let blocking = T._CL_TRUE in
     let array = array_of_bigarray genarray ba in
+    let ba_size = CArray.length array * (sizeof (CArray.element_type array)) in
     let size = match size with
       | Some n -> n
-      | None -> CArray.length array * (sizeof (CArray.element_type array)) in
+      | None -> ba_size in
+    if (offset + size) > ba_size then
+      invalid_arg "Invalid size/offset for the host array";
     let wait_list = CArray.of_list T.cl_event wait_list in
     let event = allocate T.cl_event (from_voidp T._cl_event null) in
     c_function queue mem blocking (Unsigned.Size_t.of_int offset)
@@ -324,6 +327,7 @@ module Command_queue = struct
     let region = tuple3_to_carray size_t Unsigned.Size_t.of_int region in
     let wait_list = CArray.of_list T.cl_event wait_list in
     let event = allocate T.cl_event (from_voidp T._cl_event null) in
+    (* TODO: check host_origin + region isn't > ba size *)
     c_function queue buffer blocking
       (CArray.start buffer_origin) (CArray.start host_origin)
       (CArray.start region)
