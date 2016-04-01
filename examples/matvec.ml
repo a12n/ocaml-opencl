@@ -38,9 +38,9 @@ let () =
   done;
   let ans = Array1.create float32 c_layout 4 in
   (* Create buffers *)
-  let mat_buf = Cl.Mem.create_buffer context [`Read_only; `Use_host_ptr]
+  let mat_buf = Cl.Mem.create_buffer context [`Read_only; `Copy_host_ptr]
       (`Use (genarray_of_array2 mat)) in
-  let vec_buf = Cl.Mem.create_buffer context [`Read_only; `Use_host_ptr]
+  let vec_buf = Cl.Mem.create_buffer context [`Read_only; `Copy_host_ptr]
       (`Use (genarray_of_array1 vec)) in
   let ans_buf = Cl.Mem.create_buffer context [`Write_only; `Use_host_ptr]
       (`Use (genarray_of_array1 ans)) in
