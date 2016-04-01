@@ -19,6 +19,12 @@ module CArray_ext = struct
   let to_bytes carray =
     let length = CArray.length carray in
     Bytes.of_string (string_from_ptr (CArray.start carray) ~length)
+
+  let start_or_null carray =
+    if CArray.length carray > 0 then
+      CArray.start carray
+    else
+      (from_voidp (CArray.element_type carray) null)
 end
 
 (* GC and object lifetime related functions. *)
