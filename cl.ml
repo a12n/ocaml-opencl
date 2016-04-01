@@ -311,7 +311,7 @@ module Command_queue = struct
     c_function queue mem blocking (Unsigned.Size_t.of_int offset)
       (Unsigned.Size_t.of_int size) (to_voidp (CArray.start array))
       (Unsigned.UInt32.of_int (CArray.length wait_list))
-      (CArray.start wait_list) event |> check_error;
+      (CArray_ext.start_or_null wait_list) event |> check_error;
     !@ event
 
   let read_buffer ?(wait_list=[]) ?(blocking=true) ?(offset=0) ?size =
@@ -328,7 +328,7 @@ module Command_queue = struct
       (Unsigned.Size_t.of_int src_offset) (Unsigned.Size_t.of_int dst_offset)
       (Unsigned.Size_t.of_int size)
       (Unsigned.UInt32.of_int (CArray.length wait_list))
-      (CArray.start wait_list) event |> check_error;
+      (CArray_ext.start_or_null wait_list) event |> check_error;
     !@ event
 
   let rw_image c_function wait_list blocking row_pitch slice_pitch
@@ -342,7 +342,7 @@ module Command_queue = struct
       (Unsigned.Size_t.of_int row_pitch) (Unsigned.Size_t.of_int slice_pitch)
       (to_voidp (bigarray_start genarray ba))
       (Unsigned.UInt32.of_int (CArray.length wait_list))
-      (CArray.start wait_list) event |> check_error;
+      (CArray_ext.start_or_null wait_list) event |> check_error;
     !@ event
 
   let read_image ?(wait_list=[]) ?(blocking=true) ?(row_pitch=0)
@@ -367,7 +367,7 @@ module Command_queue = struct
     C.clEnqueueCopyImage queue src_image dst_image (CArray.start src_origin)
       (CArray.start dst_origin) (CArray.start region)
       (Unsigned.UInt32.of_int (CArray.length wait_list))
-      (CArray.start wait_list) event |> check_error;
+      (CArray_ext.start_or_null wait_list) event |> check_error;
     !@ event
 
   let copy_image_to_buffer ?(wait_list=[]) queue ~src_image
@@ -381,7 +381,7 @@ module Command_queue = struct
       (CArray.start src_origin) (CArray.start region)
       (Unsigned.Size_t.of_int dst_offset)
       (Unsigned.UInt32.of_int (CArray.length wait_list))
-      (CArray.start wait_list) event |> check_error;
+      (CArray_ext.start_or_null wait_list) event |> check_error;
     !@ event
 
   let copy_buffer_to_image ?(wait_list=[]) queue ~src_buffer
@@ -394,7 +394,7 @@ module Command_queue = struct
     C.clEnqueueCopyBufferToImage queue src_buffer dst_image
       (Unsigned.Size_t.of_int src_offset) (CArray.start dst_origin)
       (CArray.start region) (Unsigned.UInt32.of_int (CArray.length wait_list))
-      (CArray.start wait_list) event |> check_error;
+      (CArray_ext.start_or_null wait_list) event |> check_error;
     !@ event
 
   let nd_range_kernel ?(wait_list=[]) ?global_work_offset
@@ -414,7 +414,7 @@ module Command_queue = struct
     C.clEnqueueNDRangeKernel queue kernel (Unsigned.UInt32.of_int work_dim)
       global_work_offset global_work_size local_work_size
       (Unsigned.UInt32.of_int (CArray.length wait_list))
-      (CArray.start wait_list) event |> check_error;
+      (CArray_ext.start_or_null wait_list) event |> check_error;
     !@ event
 
   let task ?(wait_list=[]) queue kernel =
@@ -422,7 +422,7 @@ module Command_queue = struct
     let event = allocate T.cl_event (from_voidp T._cl_event null) in
     C.clEnqueueTask queue kernel
       (Unsigned.UInt32.of_int (CArray.length wait_list))
-      (CArray.start wait_list) event |> check_error;
+      (CArray_ext.start_or_null wait_list) event |> check_error;
     !@ event
 
   let marker queue =
