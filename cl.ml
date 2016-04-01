@@ -294,9 +294,10 @@ module Command_queue = struct
   let rw_buffer ?size c_function wait_list blocking offset queue mem ba =
     let blocking = T._CL_TRUE in
     let array = array_of_bigarray genarray ba in
+    let ba_size = CArray.length array * (sizeof (CArray.element_type array)) in
     let size = match size with
       | Some n -> n
-      | None -> CArray.length array * (sizeof (CArray.element_type array)) in
+      | None -> ba_size in
     let wait_list = CArray.of_list T.cl_event wait_list in
     let event = allocate T.cl_event (from_voidp T._cl_event null) in
     c_function queue mem blocking (Unsigned.Size_t.of_int offset)
