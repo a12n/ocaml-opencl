@@ -1,4 +1,4 @@
-(** Binding for OpenCL 1.0. *)
+(** Binding for OpenCL 1.1. *)
 
 type buffer
 type image
@@ -27,6 +27,8 @@ type error =
   | Image_format_not_supported
   | Build_program_failure
   | Map_failure
+  | Misaligned_sub_buffer_offset
+  | Exec_status_error_for_events_in_wait_list
   | Invalid_value
   | Invalid_device_type
   | Invalid_platform
@@ -61,6 +63,7 @@ type error =
   | Invalid_buffer_size
   | Invalid_mip_level
   | Invalid_global_work_size
+  | Invalid_property
 
 exception Exn of error
 
@@ -95,13 +98,33 @@ module Command_queue : sig
     ?offset:int -> ?size:int -> command_queue -> buffer mem ->
     ('a, 'b, Bigarray.c_layout) Bigarray.Genarray.t -> event
 
+  val read_buffer_rect : ?wait_list:(event list) -> ?blocking:bool ->
+    ?buffer_row_pitch:int -> ?buffer_slice_pitch:int ->
+    ?host_row_pitch:int -> ?host_slice_pitch:int ->
+    command_queue -> buffer mem -> buffer_origin:(int * int * int) ->
+    host_origin:(int * int * int) -> region:(int * int * int) ->
+    ('a, 'b, Bigarray.c_layout) Bigarray.Genarray.t -> event
+
   val write_buffer : ?wait_list:(event list) -> ?blocking:bool ->
     ?offset:int -> ?size:int -> command_queue -> buffer mem ->
+    ('a, 'b, Bigarray.c_layout) Bigarray.Genarray.t -> event
+
+  val write_buffer_rect : ?wait_list:(event list) -> ?blocking:bool ->
+    ?buffer_row_pitch:int -> ?buffer_slice_pitch:int ->
+    ?host_row_pitch:int -> ?host_slice_pitch:int ->
+    command_queue -> buffer mem -> buffer_origin:(int * int * int) ->
+    host_origin:(int * int * int) -> region:(int * int * int) ->
     ('a, 'b, Bigarray.c_layout) Bigarray.Genarray.t -> event
 
   val copy_buffer : ?wait_list:(event list) -> command_queue ->
     src_buffer:(buffer mem) -> dst_buffer:(buffer mem) ->
     src_offset:int -> dst_offset:int -> size:int -> event
+
+  val copy_buffer_rect : ?wait_list:(event list) -> ?src_row_pitch:int ->
+    ?src_slice_pitch:int -> ?dst_row_pitch:int -> ?dst_slice_pitch:int ->
+    command_queue -> src_buffer:buffer mem -> dst_buffer:buffer mem ->
+    src_origin:(int * int * int) -> dst_origin:(int * int * int) ->
+    region:(int * int * int) -> event
 
   (* Reading, writing, and copying image objects. *)
 
@@ -172,6 +195,7 @@ module Device : sig
     round_to_zero : bool;
     round_to_inf : bool;
     fma : bool;
+    soft_float : bool;
   }
 
   val get : platform -> [ device_type | `All ] list -> device list
@@ -181,6 +205,7 @@ module Device : sig
   val driver_version : device -> string
   val extensions : device -> string
   val name : device -> string
+  val opencl_c_version : device -> string
   val profile : device -> string
   val vendor : device -> string
   val version : device -> string
@@ -210,9 +235,17 @@ module Device : sig
   val max_write_image_args : device -> int
   val mem_base_addr_align : device -> int
   val min_data_type_align_size : device -> int
+  val native_vector_width_char : device -> int
+  val native_vector_width_double : device -> int
+  val native_vector_width_float : device -> int
+  val native_vector_width_half : device -> int
+  val native_vector_width_int : device -> int
+  val native_vector_width_long : device -> int
+  val native_vector_width_short : device -> int
   val preferred_vector_width_char : device -> int
   val preferred_vector_width_double : device -> int
   val preferred_vector_width_float : device -> int
+  val preferred_vector_width_half : device -> int
   val preferred_vector_width_int : device -> int
   val preferred_vector_width_long : device -> int
   val preferred_vector_width_short : device -> int
@@ -225,6 +258,7 @@ module Device : sig
   val compiler_available : device -> bool
   val endian_little : device -> bool
   val error_correction_support : device -> bool
+  val host_unified_memory : device -> bool
   val image_support : device -> bool
 
   (* [fp_config] device info attributes. *)
@@ -269,16 +303,26 @@ module Mem : sig
 
   (* Create a buffer object. *)
 
+  type buffer_region = {
+    origin : int;
+    size : int;
+  }
+
   val create_buffer : context -> flag list ->
     [< `Use of ('a, 'b, Bigarray.c_layout) Bigarray.Genarray.t |
        `Alloc of ('a, 'b) Bigarray.kind * int array ] -> buffer mem
 
+  val create_sub_buffer : buffer mem -> flag list ->
+    [ `Region of buffer_region ] -> buffer mem
+
   (* Mem object info. *)
 
+  val associated_mem : buffer mem -> buffer mem option
   val context : 'k mem -> context
   val flags : 'k mem -> flag list
   val map_count : 'k mem -> int
   val mem_type : 'k mem -> mem_type
+  val offset : buffer mem -> int
   val size : 'k mem -> int
   (* TODO: host_ptr? *)
 
@@ -303,12 +347,15 @@ module Mem : sig
 
   type image_format =
     [ `R of channel_type |
+      `Rx of channel_type |
       `A of channel_type |
       `Intensity of intensity_channel_type |
       `Luminance of intensity_channel_type |
       `Rg of channel_type |
+      `Rgx of channel_type |
       `Ra of channel_type |
       `Rgb of rgb_channel_type |
+      `Rgbx of rgb_channel_type |
       `Rgba of channel_type |
       `Argb of argb_channel_type |
       `Bgra of argb_channel_type ]
@@ -337,7 +384,7 @@ end
 
 module Sampler : sig
   type addressing_mode =
-    [ `Clamp_to_edge | `Clamp | `Repeat ]
+    [ `Clamp_to_edge | `Clamp | `Repeat | `Mirrored_repeat ]
 
   type filter_mode =
     [ `Nearest | `Linear ]
@@ -423,6 +470,8 @@ module Kernel : sig
   val work_group_size : kernel -> device -> int
   val compile_work_group_size : kernel -> device -> int * int * int
   val local_mem_size : kernel -> device -> int64
+  val preferred_work_group_size_multiple : kernel -> device -> int
+  val private_mem_size : kernel -> device -> int64
 end
 
 module Event : sig
@@ -432,11 +481,22 @@ module Event : sig
       `Read_image | `Write_image |
       `Copy_image | `Copy_image_to_buffer | `Copy_buffer_to_image |
       `Map_buffer | `Map_image | `Unmap_mem_object |
-      `Marker ]
+      `Marker |
+      `Read_buffer_rect | `Write_buffer_rect | `Copy_buffer_rect |
+      `User ]
   (* TODO: Acquire/relase GL objects. *)
 
   type command_execution_status =
     [ `Queued | `Submitted | `Running | `Complete | `Error of int ]
+
+  (* User event *)
+
+  val create : context -> event
+
+  val set_status : event -> [ `Complete | `Error of int ] -> unit
+
+  val set_callback : event -> [ `Complete ] ->
+    (event -> [ `Complete | `Error of int ] -> unit) -> unit
 
   (* Wait for events. *)
 
@@ -447,6 +507,7 @@ module Event : sig
   val command_queue : event -> command_queue
   val command_type : event -> command_type
   val command_execution_status : event -> command_execution_status
+  val context : event -> context
 
   (* Event profiling info. *)
 
