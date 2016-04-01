@@ -1013,6 +1013,9 @@ module Sampler = struct
   type filter_mode =
     [ `Nearest | `Linear ]
 
+  type coords =
+    [ `Normalized | `Unnormalized ]
+
   let create context norm_coords addressing filter =
     let normalized_coords = of_bool norm_coords in
     let addressing_mode =
