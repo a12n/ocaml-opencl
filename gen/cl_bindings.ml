@@ -69,10 +69,6 @@ module Make (F : Cstubs.FOREIGN) = struct
       (T.cl_command_queue @-> T.cl_command_queue_info @-> size_t @->
        ptr void @-> ptr size_t @-> returning T.cl_int)
 
-  let clSetCommandQueueProperty = F.foreign "clSetCommandQueueProperty"
-      (T.cl_command_queue @-> T.cl_command_queue_properties @-> T.cl_bool @->
-       ptr T.cl_command_queue_properties @-> returning T.cl_int)
-
   (** {2 Memory Object APIs} *)
 
   let clCreateBuffer = F.foreign "clCreateBuffer"
@@ -345,4 +341,82 @@ module Make (F : Cstubs.FOREIGN) = struct
        ptr size_t @-> ptr size_t @-> size_t @-> size_t @-> size_t @->
        size_t @-> T.cl_uint @-> ptr T.cl_event @-> ptr T.cl_event @->
        returning T.cl_int)
+  (**************)
+  (* OpenCL 1.2 *)
+  (**************)
+
+  (* clGetExtensionFunctionAddressForPlatform *)
+
+  (** {2 Device APIs} *)
+
+  let clCreateSubDevices = F.foreign "clCreateSubDevices"
+      (T.cl_device_id @-> ptr T.cl_device_partition_property @->
+       T.cl_uint @-> ptr T.cl_device_id @-> ptr T.cl_uint @->
+       returning T.cl_int)
+
+  let clRetainDevice = F.foreign "clRetainDevice"
+      (T.cl_device_id @-> returning T.cl_int)
+
+  let clReleaseDevice = F.foreign "clReleaseDevice"
+      (T.cl_device_id @-> returning T.cl_int)
+
+  (** {2 Memory Object APIs} *)
+
+  let clCreateImage = F.foreign "clCreateImage"
+      (T.cl_context @-> T.cl_mem_flags @-> ptr T.cl_image_format @->
+       ptr T.cl_image_desc @-> ptr void @-> ptr T.cl_int @->
+       returning T.cl_mem)
+
+  (** {2 Program Object APIs} *)
+
+  let clCreateProgramWithBuiltInKernels =
+    F.foreign "clCreateProgramWithBuiltInKernels"
+      (T.cl_context @-> T.cl_uint @-> ptr T.cl_device_id @-> ptr char @->
+       ptr T.cl_int @-> returning T.cl_program)
+
+  let clCompileProgram = F.foreign "clCompileProgram"
+      (T.cl_program @-> T.cl_uint @-> ptr T.cl_device_id @-> ptr char @->
+       T.cl_uint @-> ptr T.cl_program @-> ptr (ptr char) @->
+       funptr (T.cl_program @-> ptr void @-> returning void) @->
+       ptr void @-> returning T.cl_int)
+
+  let clLinkProgram = F.foreign "clLinkProgram"
+      (T.cl_context @-> T.cl_uint @-> ptr T.cl_device_id @-> ptr char @->
+       T.cl_uint @-> ptr T.cl_program @->
+       funptr (T.cl_program @-> ptr void @-> returning void) @->
+       ptr void @-> ptr T.cl_int @-> returning T.cl_program)
+
+  let clUnloadPlatformCompiler = F.foreign "clUnloadPlatformCompiler"
+      (T.cl_platform_id @-> returning T.cl_int)
+
+  (** {2 Kernel Object APIs} *)
+
+  let clGetKernelArgInfo = F.foreign "clGetKernelArgInfo"
+      (T.cl_kernel @-> T.cl_uint @-> T.cl_kernel_arg_info @-> size_t @->
+       ptr void @-> ptr size_t @-> returning T.cl_int)
+
+  (** {2 Enqueued Commands APIs} *)
+
+  let clEnqueueFillBuffer = F.foreign "clEnqueueFillBuffer"
+      (T.cl_command_queue @-> T.cl_mem @-> ptr void @-> size_t @->
+       size_t @-> size_t @-> T.cl_uint @-> ptr T.cl_event @->
+       ptr T.cl_event @-> returning T.cl_int)
+
+  let clEnqueueFillImage = F.foreign "clEnqueueFillImage"
+      (T.cl_command_queue @-> T.cl_mem @-> ptr void @-> ptr size_t @->
+       ptr size_t @-> T.cl_uint @-> ptr T.cl_event @-> ptr T.cl_event @->
+       returning T.cl_int)
+
+  let clEnqueueMigrateMemObjects = F.foreign "clEnqueueMigrateMemObjects"
+      (T.cl_command_queue @-> T.cl_uint @-> ptr T.cl_mem @->
+       T.cl_mem_migration_flags @-> T.cl_uint @-> ptr T.cl_event @->
+       ptr T.cl_event @-> returning T.cl_int)
+
+  let clEnqueueMarkerWithWaitList = F.foreign "clEnqueueMarkerWithWaitList"
+      (T.cl_command_queue @-> T.cl_uint @-> ptr T.cl_event @->
+       ptr T.cl_event @-> returning T.cl_int)
+
+  let clEnqueueBarrierWithWaitList = F.foreign "clEnqueueBarrierWithWaitList"
+      (T.cl_command_queue @-> T.cl_uint @-> ptr T.cl_event @->
+       ptr T.cl_event @-> returning T.cl_int)
 end
