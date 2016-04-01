@@ -42,8 +42,8 @@ let () =
       (`Use (genarray_of_array2 mat)) in
   let vec_buf = Cl.Mem.create_buffer context [`Read_only; `Copy_host_ptr]
       (`Use (genarray_of_array1 vec)) in
-  let ans_buf = Cl.Mem.create_buffer context [`Write_only; `Use_host_ptr]
-      (`Use (genarray_of_array1 ans)) in
+  let ans_buf = Cl.Mem.create_buffer context [`Write_only]
+      (`Alloc (float32, [|4|])) in
   (* Set kernel args *)
   Cl.Kernel.(set_arg kernel 0 (`Mem mat_buf);
              set_arg kernel 1 (`Mem vec_buf);
@@ -56,6 +56,9 @@ let () =
     Cl.Event.(command_start event, command_end event) in
   Printf.eprintf "Time: %Ld\n" (Int64.sub command_end command_start);
   (* Print ans *)
+  let event = Cl.Command_queue.read_buffer queue
+      ans_buf (genarray_of_array1 ans) in
+  Cl.Event.wait [event];
   for i = 0 to 4 - 1 do
     Printf.printf "ans.{%d} = %f\n" i ans.{i}
   done
